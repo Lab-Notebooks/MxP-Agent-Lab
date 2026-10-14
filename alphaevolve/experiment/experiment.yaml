@@ -1,0 +1,42 @@
+# Copyright 2026 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+title: "Deforming Bubble Mixed-Precision (FP16/FP32) Trajectory Optimization"
+problem_description: |
+  Optimize the 2D MPI level-set Deforming Bubble simulation kernels across src/advect.cpp, src/redistance.cpp, src/init.cpp, and src/driver.cpp to reproduce the 64-bit (FP64) reference trajectory as accurately as possible while strictly operating in 16-bit (_Float16) and 32-bit (float) precision.
+
+  STRICT RULES & CONSTRAINTS:
+  1. You MUST NOT use 64-bit floating-point types (`double`, `float64_t`, `__float128`, or `MPI_DOUBLE`) or 64-bit floating-point literals (always suffix literals with `f` or cast to `_Float16`) inside any `// EVOLVE-BLOCK-START ... // EVOLVE-BLOCK-END` section. The evaluator inspects both the C++ source and the compiled object disassembly (`objdump -d`) and will reject any candidate that emits 64-bit `sd`/`pd` floating-point instructions inside the `*LowPrec` functions.
+  2. You MUST NOT add `#include` directives inside any `EVOLVE-BLOCK`. Standard headers (`<cmath>`, `<algorithm>`, `<cstdint>`, `<immintrin.h>`, `<vector>`) are already included at the top of each file.
+  3. Preserve the function signatures of `wenoFaceValueLowPrec`, `advectWenoLowPrec`, `lsPseudoTimestepLowPrec`, `godunovGradMagLowPrec`, `redistanceIterationLowPrec`, `redistanceLowPrec`, `computeFaceVelocityLowPrec`, `maxFaceSpeedsLowPrec`, `computeTimestepLowPrec`, and `advanceOneStepLowPrec`.
+  4. You may use `g.dx_f()`, `g.dy_f()`, `g.xCenter_f(i)`, `g.yCenter_f(j)`, `g.xFace_f(i)`, `g.yFace_f(j)`, `g.exchange_f(vec_float)`, and `g.exchange_f16(vec_fp16)` provided by `Grid`.
+
+  NUMERICAL GUIDANCE:
+  - In `wenoFaceValueLowPrec` (src/advect.cpp), shifting the 5-point stencil by the center value `s3` (working with relative differences `d_k = (s_k - s3) / dx` of O(1) before computing smoothness indicators `rIS1..3` and polynomial reconstructions in `_Float16` / `float`, then adding `s3` back) avoids catastrophic cancellation and underflow.
+  - Choose `kEps` and scaling factors in WENO5 and Eikonal redistancing (`src/redistance.cpp`) carefully so smoothness weights do not underflow or over-smooth the interface.
+  - In `computeFaceVelocityLowPrec` (src/init.cpp), using exact trigonometric difference identities such as `cos(A + B) - cos(A - B) = -2 * sin(A) * sin(B)` prevents catastrophic cancellation when evaluating `cos(2*pi*(y + dy/2)) - cos(2*pi*(y - dy/2))` in low precision.
+  - In `advanceOneStepLowPrec` (src/driver.cpp), avoid truncating `dt` or `rhs` unnecessarily, and consider compensated summation or higher-precision `float` accumulation when updating `phi`.
+program_language: "cpp"
+primary_metric: "trajectory_accuracy_score"
+initial_score: 4.6268
+
+seed_files:
+  - "src/advect.cpp"
+  - "src/redistance.cpp"
+  - "src/init.cpp"
+  - "src/driver.cpp"
+
+evaluator:
+  script: "evaluator.py"
+  method: "evaluate_bubble_mxp"
