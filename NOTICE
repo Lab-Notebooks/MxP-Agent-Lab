@@ -1,0 +1,29 @@
+AlphaEvolve-MxP
+Copyright (c) 2026 Akash Dhruv
+
+This project is licensed under the MIT License (see LICENSE).
+
+------------------------------------------------------------------------------
+Flash-X
+------------------------------------------------------------------------------
+
+The Deforming Bubble mini-app in this repository (src/, params/) is modeled on
+Flash-X, https://flash-x.org, developed by the Flash-X team. Its numerical
+kernels and problem setup were ported to C++ from the following Flash-X
+sources, with modifications:
+
+  source/numericalTools/Stencils/StencilsAdvection/Stencils_advectWeno.F90
+  source/numericalTools/Stencils/StencilsLevelset/Stencils_lsRedistance2d.F90
+  source/physics/Multiphase/MultiphaseMain/Multiphase_redistance.F90
+  source/Simulation/SimulationMain/incompFlow/DeformingBubble/
+      Simulation_initBlock.F90
+      Driver_evolveAll.F90-mc
+
+Flash-X is licensed under the Apache License, Version 2.0. A copy of that
+license is included at the end of LICENSE.
+
+If you use this work in a publication, please also cite Flash-X:
+
+  A. Dubey, K. Weide, J. O'Neal, A. Dhruv, S. Couch, J. A. Harris, et al.,
+  "Flash-X: A multiphysics simulation software instrument,"
+  SoftwareX 19 (2022) 101168. https://doi.org/10.1016/j.softx.2022.101168
