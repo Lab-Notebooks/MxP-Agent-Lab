@@ -1,21 +1,8 @@
-// grid.cpp -- see grid.h.
-//
-// Spec: dev/tasks/init-project/spec.md, "Parallel contract":
-//   "Halo exchange: 3-deep layers, MPI_Sendrecv in x then in y, so corner
-//    guard cells arrive via the second sweep."
-// and "Boundary conditions":
-//   "Physical walls: zero-gradient (Neumann) extrapolation of phi into all 3
-//    guard layers."
-//
-// The ordering matters.  The x sweep touches only the owned rows j in [0, ny);
-// the y sweep then moves whole rows of width sx (guard columns included), so a
-// corner guard cell is the neighbour's guard column value, which the x sweep
-// had already made valid.  Neumann fill follows the same two-sweep order, so a
-// corner that is physical in one direction and a rank boundary in the other
-// comes out identical to the serial answer.
+// grid.cpp -- Cartesian grid and halo exchanges for FP64, FP32, and FP16.
 
 #include "grid.h"
 
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -35,7 +22,6 @@ bool Grid::create(const Params& p, MPI_Comm comm, std::string& err) {
             return false;
         }
     } else {
-        // MPI_Dims_create honours any non-zero entry and fills the rest.
         MPI_Dims_create(worldSize, 2, dims);
     }
 
@@ -98,43 +84,36 @@ void Grid::destroy() {
 
 Grid::~Grid() { destroy(); }
 
-// x sweep: ng columns x ny owned rows, packed because columns are strided.
 void Grid::exchangeX(std::vector<double>& f) const {
     const int count = ng_ * ny_;
     std::vector<double> sendLo(count), sendHi(count), recvLo(count), recvHi(count);
 
     for (int j = 0; j < ny_; ++j) {
         for (int k = 0; k < ng_; ++k) {
-            sendLo[j * ng_ + k] = f[index(k, j)];                   // i = 0 .. ng-1
-            sendHi[j * ng_ + k] = f[index(nx_ - ng_ + k, j)];       // i = nx-ng .. nx-1
+            sendLo[j * ng_ + k] = f[index(k, j)];
+            sendHi[j * ng_ + k] = f[index(nx_ - ng_ + k, j)];
         }
     }
 
-    // to the low neighbour, from the high neighbour
     MPI_Sendrecv(sendLo.data(), count, MPI_DOUBLE, nbrXlo_, 100, recvHi.data(), count, MPI_DOUBLE,
                  nbrXhi_, 100, cart_, MPI_STATUS_IGNORE);
-    // to the high neighbour, from the low neighbour
     MPI_Sendrecv(sendHi.data(), count, MPI_DOUBLE, nbrXhi_, 101, recvLo.data(), count, MPI_DOUBLE,
                  nbrXlo_, 101, cart_, MPI_STATUS_IGNORE);
 
     for (int j = 0; j < ny_; ++j) {
         for (int k = 0; k < ng_; ++k) {
-            // low guard columns i = -ng .. -1
             f[index(-ng_ + k, j)] = atWallXlo() ? f[index(0, j)] : recvLo[j * ng_ + k];
-            // high guard columns i = nx .. nx+ng-1
             f[index(nx_ + k, j)] = atWallXhi() ? f[index(nx_ - 1, j)] : recvHi[j * ng_ + k];
         }
     }
 }
 
-// y sweep: ng rows of the full width sx (guard columns included, so corners
-// come across).  Rows are contiguous in this layout.
 void Grid::exchangeY(std::vector<double>& f) const {
     const int count = ng_ * sx_;
     std::vector<double> recvLo(count), recvHi(count);
 
-    const double* sendLo = &f[index(-ng_, 0)];           // rows j = 0 .. ng-1
-    const double* sendHi = &f[index(-ng_, ny_ - ng_)];   // rows j = ny-ng .. ny-1
+    const double* sendLo = &f[index(-ng_, 0)];
+    const double* sendHi = &f[index(-ng_, ny_ - ng_)];
 
     MPI_Sendrecv(sendLo, count, MPI_DOUBLE, nbrYlo_, 200, recvHi.data(), count, MPI_DOUBLE, nbrYhi_,
                  200, cart_, MPI_STATUS_IGNORE);
@@ -153,4 +132,120 @@ void Grid::exchangeY(std::vector<double>& f) const {
 void Grid::exchange(std::vector<double>& f) const {
     exchangeX(f);
     exchangeY(f);
+}
+
+void Grid::exchangeX_f(std::vector<float>& f) const {
+    const int count = ng_ * ny_;
+    std::vector<float> sendLo(count), sendHi(count), recvLo(count), recvHi(count);
+
+    for (int j = 0; j < ny_; ++j) {
+        for (int k = 0; k < ng_; ++k) {
+            sendLo[j * ng_ + k] = f[index(k, j)];
+            sendHi[j * ng_ + k] = f[index(nx_ - ng_ + k, j)];
+        }
+    }
+
+    MPI_Sendrecv(sendLo.data(), count, MPI_FLOAT, nbrXlo_, 110, recvHi.data(), count, MPI_FLOAT,
+                 nbrXhi_, 110, cart_, MPI_STATUS_IGNORE);
+    MPI_Sendrecv(sendHi.data(), count, MPI_FLOAT, nbrXhi_, 111, recvLo.data(), count, MPI_FLOAT,
+                 nbrXlo_, 111, cart_, MPI_STATUS_IGNORE);
+
+    for (int j = 0; j < ny_; ++j) {
+        for (int k = 0; k < ng_; ++k) {
+            f[index(-ng_ + k, j)] = atWallXlo() ? f[index(0, j)] : recvLo[j * ng_ + k];
+            f[index(nx_ + k, j)] = atWallXhi() ? f[index(nx_ - 1, j)] : recvHi[j * ng_ + k];
+        }
+    }
+}
+
+void Grid::exchangeY_f(std::vector<float>& f) const {
+    const int count = ng_ * sx_;
+    std::vector<float> recvLo(count), recvHi(count);
+
+    const float* sendLo = &f[index(-ng_, 0)];
+    const float* sendHi = &f[index(-ng_, ny_ - ng_)];
+
+    MPI_Sendrecv(sendLo, count, MPI_FLOAT, nbrYlo_, 210, recvHi.data(), count, MPI_FLOAT, nbrYhi_,
+                 210, cart_, MPI_STATUS_IGNORE);
+    MPI_Sendrecv(sendHi, count, MPI_FLOAT, nbrYhi_, 211, recvLo.data(), count, MPI_FLOAT, nbrYlo_,
+                 211, cart_, MPI_STATUS_IGNORE);
+
+    for (int k = 0; k < ng_; ++k) {
+        for (int i = -ng_; i < nx_ + ng_; ++i) {
+            const int c = k * sx_ + (i + ng_);
+            f[index(i, -ng_ + k)] = atWallYlo() ? f[index(i, 0)] : recvLo[c];
+            f[index(i, ny_ + k)] = atWallYhi() ? f[index(i, ny_ - 1)] : recvHi[c];
+        }
+    }
+}
+
+void Grid::exchange_f(std::vector<float>& f) const {
+    exchangeX_f(f);
+    exchangeY_f(f);
+}
+
+void Grid::exchangeX_f16(std::vector<_Float16>& f) const {
+    const int count = ng_ * ny_;
+    std::vector<uint16_t> sendLo(count), sendHi(count), recvLo(count), recvHi(count);
+
+    for (int j = 0; j < ny_; ++j) {
+        for (int k = 0; k < ng_; ++k) {
+            std::memcpy(&sendLo[j * ng_ + k], &f[index(k, j)], sizeof(uint16_t));
+            std::memcpy(&sendHi[j * ng_ + k], &f[index(nx_ - ng_ + k, j)], sizeof(uint16_t));
+        }
+    }
+
+    MPI_Sendrecv(sendLo.data(), count, MPI_UINT16_T, nbrXlo_, 120, recvHi.data(), count,
+                 MPI_UINT16_T, nbrXhi_, 120, cart_, MPI_STATUS_IGNORE);
+    MPI_Sendrecv(sendHi.data(), count, MPI_UINT16_T, nbrXhi_, 121, recvLo.data(), count,
+                 MPI_UINT16_T, nbrXlo_, 121, cart_, MPI_STATUS_IGNORE);
+
+    for (int j = 0; j < ny_; ++j) {
+        for (int k = 0; k < ng_; ++k) {
+            if (atWallXlo()) {
+                f[index(-ng_ + k, j)] = f[index(0, j)];
+            } else {
+                std::memcpy(&f[index(-ng_ + k, j)], &recvLo[j * ng_ + k], sizeof(uint16_t));
+            }
+            if (atWallXhi()) {
+                f[index(nx_ + k, j)] = f[index(nx_ - 1, j)];
+            } else {
+                std::memcpy(&f[index(nx_ + k, j)], &recvHi[j * ng_ + k], sizeof(uint16_t));
+            }
+        }
+    }
+}
+
+void Grid::exchangeY_f16(std::vector<_Float16>& f) const {
+    const int count = ng_ * sx_;
+    std::vector<uint16_t> recvLo(count), recvHi(count);
+
+    const _Float16* sendLo = &f[index(-ng_, 0)];
+    const _Float16* sendHi = &f[index(-ng_, ny_ - ng_)];
+
+    MPI_Sendrecv(sendLo, count, MPI_UINT16_T, nbrYlo_, 220, recvHi.data(), count, MPI_UINT16_T,
+                 nbrYhi_, 220, cart_, MPI_STATUS_IGNORE);
+    MPI_Sendrecv(sendHi, count, MPI_UINT16_T, nbrYhi_, 221, recvLo.data(), count, MPI_UINT16_T,
+                 nbrYlo_, 221, cart_, MPI_STATUS_IGNORE);
+
+    for (int k = 0; k < ng_; ++k) {
+        for (int i = -ng_; i < nx_ + ng_; ++i) {
+            const int c = k * sx_ + (i + ng_);
+            if (atWallYlo()) {
+                f[index(i, -ng_ + k)] = f[index(i, 0)];
+            } else {
+                std::memcpy(&f[index(i, -ng_ + k)], &recvLo[c], sizeof(uint16_t));
+            }
+            if (atWallYhi()) {
+                f[index(i, ny_ + k)] = f[index(i, ny_ - 1)];
+            } else {
+                std::memcpy(&f[index(i, ny_ + k)], &recvHi[c], sizeof(uint16_t));
+            }
+        }
+    }
+}
+
+void Grid::exchange_f16(std::vector<_Float16>& f) const {
+    exchangeX_f16(f);
+    exchangeY_f16(f);
 }

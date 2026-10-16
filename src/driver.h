@@ -64,4 +64,11 @@ struct RunSummary {
 bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, RunSummary& summary,
                    std::string& err);
 
+// Low-precision (FP16/FP32) entry points evolved by AlphaEvolve
+float computeTimestepLowPrec(float cfl, float fixed_dt, float tmax, const Grid& g, float umax,
+                             float vmax, float time);
+long advanceOneStepLowPrec(const Grid& g, int ls_iterations, std::vector<float>& phi,
+                           const std::vector<float>& u, const std::vector<float>& v, float dt,
+                           std::vector<float>& rhs, std::vector<float>& phiOrig);
+
 #endif  // BUBBLE_DRIVER_H

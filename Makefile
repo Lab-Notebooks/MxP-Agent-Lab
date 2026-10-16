@@ -6,8 +6,9 @@
 #
 # No -ffast-math (breaks the 1e-12 reproducibility tolerance, Spec "Silent traps").
 
+export OMPI_CXX := /opt/rh/gcc-toolset-15/root/usr/bin/g++
 CXX      := mpicxx
-CXXFLAGS := -std=c++17 -O2 -g -Wall -Wextra -Werror -MMD -MP
+CXXFLAGS := -std=gnu++17 -O2 -g -mavx2 -mf16c -mfma -Wall -Wextra -Werror -Wno-error=cast-function-type -DOMPI_SKIP_MPICXX -MMD -MP
 LDFLAGS  :=
 LDLIBS   := -lm
 

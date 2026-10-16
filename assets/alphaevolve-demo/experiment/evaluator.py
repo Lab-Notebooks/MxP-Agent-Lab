@@ -26,15 +26,61 @@ import tempfile
 from typing import Dict, List, Optional, Tuple
 import xml.etree.ElementTree as ET
 
-from alpha_evolve.models import (
-    AlphaEvolveEvaluationInsight,
-    AlphaEvolveEvaluationInsights,
-    AlphaEvolveEvaluationScore,
-    AlphaEvolveEvaluationScores,
-    AlphaEvolveProgramEvaluation,
-)
-from alpha_evolve.utils import get_job_id_from_program_name
-from alpha_evolve.visualization import get_score
+try:
+    from alpha_evolve.models import (
+        AlphaEvolveEvaluationInsight,
+        AlphaEvolveEvaluationInsights,
+        AlphaEvolveEvaluationScore,
+        AlphaEvolveEvaluationScores,
+        AlphaEvolveProgramEvaluation,
+    )
+    from alpha_evolve.utils import get_job_id_from_program_name
+    from alpha_evolve.visualization import get_score
+except ImportError:
+    class AlphaEvolveEvaluationInsight:
+        def __init__(self, label: str, text: str):
+            self.label = label
+            self.text = text
+        def model_dump(self) -> dict:
+            return {"label": self.label, "text": self.text}
+
+    class AlphaEvolveEvaluationInsights:
+        def __init__(self, insights: list):
+            self.insights = insights
+        def model_dump(self) -> list:
+            return [i.model_dump() for i in self.insights]
+
+    class AlphaEvolveEvaluationScore:
+        def __init__(self, metric: str, score: Optional[float]):
+            self.metric = metric
+            self.score = score
+        def model_dump(self) -> dict:
+            return {"metric": self.metric, "score": self.score}
+
+    class AlphaEvolveEvaluationScores:
+        def __init__(self, scores: list):
+            self.scores = scores
+        def model_dump(self) -> list:
+            return [s.model_dump() for s in self.scores]
+
+    class AlphaEvolveProgramEvaluation:
+        def __init__(self, scores: AlphaEvolveEvaluationScores, insights: AlphaEvolveEvaluationInsights):
+            self.scores = scores
+            self.insights = insights
+        def model_dump(self) -> dict:
+            return {
+                "scores": {"scores": self.scores.model_dump()},
+                "insights": {"insights": self.insights.model_dump()},
+            }
+
+    def get_job_id_from_program_name(program_name: str, job_prefix: str) -> str:
+        return f"{job_prefix}-0"
+
+    def get_score(prog: dict, metric: str) -> Optional[float]:
+        for s in prog.get("scores", {}).get("scores", []):
+            if s.get("metric") == metric:
+                return s.get("score")
+        return None
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +189,7 @@ def audit_low_precision_compliance() -> Tuple[bool, List[AlphaEvolveEvaluationIn
                     header_match = re.match(r"^[0-9a-fA-F]+\s+<([^>]+)>:", line)
                     if header_match:
                         current_fn = header_match.group(1)
-                        in_low_prec_fn = "LowPrec" in current_fn
+                        in_low_prec_fn = "LowPrec" in current_fn or "mxp_eft::" in current_fn
                         continue
                     if in_low_prec_fn:
                         asm_match = FORBIDDEN_ASM_MNEMONICS.search(line)
@@ -244,6 +290,10 @@ def _parse_mpi_grid_summary(log_text: str) -> str:
 
 def _mpi_cmd(binary: str, outdir: str, extra_overrides: List[str]) -> List[str]:
     np_ranks = os.environ.get("BUBBLE_MPI_RANKS", "4")
+    ini_file = os.environ.get(
+        "BUBBLE_PARAM_FILE",
+        "params/bubble_eval.ini" if os.path.isfile("params/bubble_eval.ini") else "params/bubble.ini",
+    )
     cmd = [
         "mpirun",
         "--allow-run-as-root",
@@ -251,7 +301,7 @@ def _mpi_cmd(binary: str, outdir: str, extra_overrides: List[str]) -> List[str]:
         "-np",
         str(np_ranks),
         binary,
-        "params/bubble.ini",
+        ini_file,
         f"outdir={outdir}",
     ]
     cmd.extend(extra_overrides)
@@ -286,21 +336,20 @@ def evaluate_bubble_mxp() -> dict:
     """Evaluates the candidate low-precision bubble simulation against the FP64 baseline."""
     insights_list: List[AlphaEvolveEvaluationInsight] = []
 
-    # 1. Verify compilation succeeded and check strict low-precision compliance
-    if not os.path.isfile("./bubble"):
-        res = subprocess.run(["make", "all"], capture_output=True, text=True, check=False)
-        if res.returncode != 0:
-            insights_list.append(
-                AlphaEvolveEvaluationInsight(
-                    label="COMPILATION_ERROR",
-                    text=f"Compilation failed:\n{res.stdout}\n{res.stderr}",
-                )
+    # 1. Compile candidate sources and check strict low-precision compliance
+    res = subprocess.run(["make", "all"], capture_output=True, text=True, check=False)
+    if res.returncode != 0 or not os.path.isfile("./bubble"):
+        insights_list.append(
+            AlphaEvolveEvaluationInsight(
+                label="COMPILATION_ERROR",
+                text=f"Compilation failed:\n{res.stdout}\n{res.stderr}",
             )
-            scores = [AlphaEvolveEvaluationScore(metric=PRIMARY_METRIC, score=None)]
-            return AlphaEvolveProgramEvaluation(
-                scores=AlphaEvolveEvaluationScores(scores=scores),
-                insights=AlphaEvolveEvaluationInsights(insights=insights_list),
-            ).model_dump()
+        )
+        scores = [AlphaEvolveEvaluationScore(metric=PRIMARY_METRIC, score=None)]
+        return AlphaEvolveProgramEvaluation(
+            scores=AlphaEvolveEvaluationScores(scores=scores),
+            insights=AlphaEvolveEvaluationInsights(insights=insights_list),
+        ).model_dump()
 
     compliant, audit_insights, type_counts = audit_low_precision_compliance()
     insights_list.extend(audit_insights)

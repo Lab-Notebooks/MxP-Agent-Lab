@@ -1,0 +1,21 @@
+# Copyright 2026 Google LLC
+# GDM AlphaEvolve Per-Hotspot Experiment Specification (driver)
+
+title: "Deforming Bubble Hotspot 4: Compensated Time Integrator & CFL Controller (src/driver.cpp)"
+problem_description: |
+  Optimize computeTimestepLowPrec and advanceOneStepLowPrec in src/driver.cpp to eliminate secular area drift and interface sign flips over multi-step level-set evolution while operating strictly in 16-bit (_Float16) and 32-bit (float) precision (0 64-bit sd/pd instructions in objdump -d). Recover exact rational CFL (1/20) from _Float16 and accumulate dfun += dt * rhs using Knuth two_sum and FMA two_prod compensation.
+
+  STRICT RULES & CONSTRAINTS:
+  1. You MUST NOT use 64-bit floating-point types (`double`, `float64_t`, `__float128`, or `MPI_DOUBLE`) or 64-bit floating-point literals inside any `// EVOLVE-BLOCK-START ... // EVOLVE-BLOCK-END` section.
+  2. You MUST NOT add `#include` directives inside any `EVOLVE-BLOCK`.
+  3. The evaluator inspects both C++ source and `objdump -d` disassembly and rejects any candidate that emits 64-bit `sd`/`pd` instructions inside `*LowPrec` functions.
+program_language: "cpp"
+primary_metric: "composite_fitness"
+initial_score: 5.2
+
+seed_files:
+  - "src/driver.cpp"
+
+evaluator:
+  script: "evaluator.py"
+  method: "evaluate_driver_mxp"

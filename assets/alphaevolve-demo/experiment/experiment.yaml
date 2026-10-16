@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-title: "Deforming Bubble Mixed-Precision (FP16/FP32) Trajectory Optimization"
+title: "Deforming Bubble Mixed-Precision (FP16/FP32) Trajectory & Hardware-Cost Optimization (Option B Warm-Start)"
 problem_description: |
-  Optimize the 2D MPI level-set Deforming Bubble simulation kernels across src/advect.cpp, src/redistance.cpp, src/init.cpp, and src/driver.cpp to reproduce the 64-bit (FP64) reference trajectory as accurately as possible while strictly operating in 16-bit (_Float16) and 32-bit (float) precision.
+  Optimize the 2D MPI level-set Deforming Bubble simulation kernels across src/advect.cpp, src/redistance.cpp, src/init.cpp, and src/driver.cpp starting from the verified Ozaki-EFT mixed-precision baseline (initial_score = 15.6374, Trajectory RMSE = 1.14e-08) to further improve trajectory accuracy, increase 16-bit (_Float16) utilization, reduce 32-bit float instruction overhead (fp32_asm_ops), and accelerate runtime while strictly maintaining Cumulative Trajectory RMSE <= 1.0e-7 (trajectory_accuracy_score >= 14.0) and zero 64-bit instructions.
 
   STRICT RULES & CONSTRAINTS:
   1. You MUST NOT use 64-bit floating-point types (`double`, `float64_t`, `__float128`, or `MPI_DOUBLE`) or 64-bit floating-point literals (always suffix literals with `f` or cast to `_Float16`) inside any `// EVOLVE-BLOCK-START ... // EVOLVE-BLOCK-END` section. The evaluator inspects both the C++ source and the compiled object disassembly (`objdump -d`) and will reject any candidate that emits 64-bit `sd`/`pd` floating-point instructions inside the `*LowPrec` functions.
@@ -22,14 +22,15 @@ problem_description: |
   3. Preserve the function signatures of `wenoFaceValueLowPrec`, `advectWenoLowPrec`, `lsPseudoTimestepLowPrec`, `godunovGradMagLowPrec`, `redistanceIterationLowPrec`, `redistanceLowPrec`, `computeFaceVelocityLowPrec`, `maxFaceSpeedsLowPrec`, `computeTimestepLowPrec`, and `advanceOneStepLowPrec`.
   4. You may use `g.dx_f()`, `g.dy_f()`, `g.xCenter_f(i)`, `g.yCenter_f(j)`, `g.xFace_f(i)`, `g.yFace_f(j)`, `g.exchange_f(vec_float)`, and `g.exchange_f16(vec_fp16)` provided by `Grid`.
 
-  NUMERICAL GUIDANCE:
-  - In `wenoFaceValueLowPrec` (src/advect.cpp), shifting the 5-point stencil by the center value `s3` (working with relative differences `d_k = (s_k - s3) / dx` of O(1) before computing smoothness indicators `rIS1..3` and polynomial reconstructions in `_Float16` / `float`, then adding `s3` back) avoids catastrophic cancellation and underflow.
-  - Choose `kEps` and scaling factors in WENO5 and Eikonal redistancing (`src/redistance.cpp`) carefully so smoothness weights do not underflow or over-smooth the interface.
-  - In `computeFaceVelocityLowPrec` (src/init.cpp), using exact trigonometric difference identities such as `cos(A + B) - cos(A - B) = -2 * sin(A) * sin(B)` prevents catastrophic cancellation when evaluating `cos(2*pi*(y + dy/2)) - cos(2*pi*(y - dy/2))` in low precision.
-  - In `advanceOneStepLowPrec` (src/driver.cpp), avoid truncating `dt` or `rhs` unnecessarily, and consider compensated summation or higher-precision `float` accumulation when updating `phi`.
+  NUMERICAL GUIDANCE & WARM-START OPTIMIZATION OPPORTUNITIES (OPTION B):
+  - Current Baseline Architecture: The seed files already implement Ozaki/Dekker float-float (`ff32 = {hi, lo}`) Error-Free Transformations (`two_sum`, `quick_two_sum`, `two_prod` via `std::fmaf`), center-shifted WENO5 (`v_k = s_k - s_3`) with exact `2^32` power-of-two scaling to prevent binary32 subnormal underflow, 3-slice exact `pi` splitting with 72-bit (`ff32_3`) prefix-summed streamfunction increments (`max|div u| = 1.78e-14`), and `_Float16` rational CFL recovery (`1/20`).
+  - How to Evolve Further in AlphaEvolve:
+    1) Replace full 6-op `two_sum` with 3-op `quick_two_sum` wherever operand magnitudes are guaranteed to be ordered (`|a| >= |b|`), such as adding small `.lo` compensation terms or `O(dx)` stencil increments to `O(1)` base values.
+    2) Expand `_Float16` storage and fast-path arithmetic in smooth / far-field regions (`|phi| > k * dx`) while retaining full `ff32` Ozaki-EFT accuracy inside the interface band (`|phi| <= 5 * dx`).
+    3) Simplify polynomial and trigonometric evaluations in `src/advect.cpp`, `src/redistance.cpp`, and `src/init.cpp` to reduce `fp32_asm_ops` and wall-clock runtime without degrading Trajectory RMSE below `1.14e-08` (or improving it closer to `0.0`, score -> `16.0`).
 program_language: "cpp"
 primary_metric: "trajectory_accuracy_score"
-initial_score: 4.6268
+initial_score: 15.6374
 
 seed_files:
   - "src/advect.cpp"
