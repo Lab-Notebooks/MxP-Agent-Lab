@@ -1,0 +1,12 @@
+# Cryptographic Gate Sign-Off for stage-5_package
+approved = true
+approved_by = "ArgonClaw-MultiModel-Council (Gemini-4-Argon + Opus-5.5 + Fable-5.1)"
+approval_mode = "auto-gate-with-council"
+approved_at = "2026-10-16T19:07:32.526861+00:00"
+run_id = "20261016T190732Z-turbo"
+git_sha = "74efc3fc62eb26171f793f09772eee46ea2a9252"
+desired_spec_sha256 = "5ebe79ab9231516cd3850284a79e8c0fcadb05372cb068199b0c317258dac208"
+current_plan_sha256 = "9043b3f927090618d17295f8bf939cf7b571c5eb3818a65496bf99941b77d4c0"
+evaluator_sha256 = "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9"
+handoff_grill_sha256 = "929747151b78f1eb66ebcaec127b8a907de1df56a3879399463f2555346d3671"
+notes = "Contextual /grill-me handoff verified automatically from 20261016T190732Z-turbo"

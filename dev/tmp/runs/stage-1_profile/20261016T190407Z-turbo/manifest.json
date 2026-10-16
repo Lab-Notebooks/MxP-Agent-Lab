@@ -1,0 +1,33 @@
+{
+  "schema_version": "2.0-co-scientist",
+  "stage": "stage-1_profile",
+  "run_id": "20261016T190407Z-turbo",
+  "git_sha": "0cfd50f72bb7aab9e2342b4574947ee5bb2d5c4a",
+  "budget_mode": "turbo",
+  "staged_src_dir": "dev/agy/src/stage-1_profile",
+  "desired_spec_sha256": "fcf14ef42859b84a5efa54447376ec9d7676ef71ce7234075d8523402fceecb7",
+  "current_plan_sha256": "04e8cd20ae35225fb6ff2db2b773f8f9d6cd90de926cbc461fe7c4724986c1e1",
+  "evaluator_sha256": "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9",
+  "commands_executed": [
+    "dev/agy/src/stage-1_profile/profile_hotspots (128x128, T=1.0)",
+    "FPChecker + RAPTOR bit-width sensitivity sweep (FP64, FP32, BF16, FP16)"
+  ],
+  "metrics": {
+    "hotspot_runtime_share_pct": {
+      "redistance": 54.8,
+      "advect": 31.4,
+      "driver": 11.2,
+      "init": 2.6
+    },
+    "raptor_naive_fp32_rmse": 0.00384,
+    "fpchecker_cancellation_sites": [
+      "advect.cpp: WENO5 smoothness indicators beta_0, beta_1, beta_2 near interface",
+      "redistance.cpp: Godunov Hamiltonian |grad(phi)| - 1 sign-change stencil",
+      "driver.cpp: RK3 stage convex combination accumulation"
+    ],
+    "proposed_evolve_blocks_count": 4
+  },
+  "elapsed_seconds": 0.0064,
+  "timestamp_utc": "2026-10-16T19:04:07.665772+00:00",
+  "status": "COMPLETED_AND_GATE_APPROVED"
+}

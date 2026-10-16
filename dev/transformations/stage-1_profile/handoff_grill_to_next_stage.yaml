@@ -1,0 +1,37 @@
+# Contextual HITL /grill-me Handoff Gate: stage-1_profile -> stage-2_evaluator
+{
+  "from_stage": "stage-1_profile",
+  "to_stage": "stage-2_evaluator",
+  "context_carried_forward": {
+    "hotspot_runtime_share_pct": {
+      "redistance": 54.8,
+      "advect": 31.4,
+      "driver": 11.2,
+      "init": 2.6
+    },
+    "raptor_naive_fp32_rmse": 0.00384,
+    "fpchecker_cancellation_sites": [
+      "advect.cpp: WENO5 smoothness indicators beta_0, beta_1, beta_2 near interface",
+      "redistance.cpp: Godunov Hamiltonian |grad(phi)| - 1 sign-change stencil",
+      "driver.cpp: RK3 stage convex combination accumulation"
+    ],
+    "proposed_evolve_blocks": [
+      "advect.cpp:EVOLVE-BLOCK",
+      "redistance.cpp:EVOLVE-BLOCK",
+      "init.cpp:EVOLVE-BLOCK",
+      "driver.cpp:EVOLVE-BLOCK"
+    ]
+  },
+  "grill_me_questions": [
+    {
+      "id": "Q1_1_evaluator_tolerances",
+      "question": "Stage 1 showed redistance (54.8%) and advect (31.4%) dominate runtime, while naive FP32 degrades RMSE to 3.84e-03 due to WENO5/Godunov cancellation. For Stage 2 (Build Evaluator), should we enforce a hard gate of RMSE(phi) <= 1.0e-7 with 0 FP64 ops inside EVOLVE-BLOCKs?",
+      "default_recommendation": "Yes \u2014 enforce RMSE(phi) <= 1.0e-7, L_inf(div u) <= 1.0e-12, and 0 FP64 operations in EVOLVE-BLOCKs."
+    },
+    {
+      "id": "Q1_2_red_team_cheat_vectors",
+      "question": "Which adversarial Red-Team cheat vectors must Stage 2's unified evaluator.py reject (score == 0.0) before freezing the evaluator hash for Stage 3?",
+      "default_recommendation": "Require 100% rejection of all 3 planted cheat vectors: (1) cached output lookup table, (2) obfuscated FP64 via decltype(0.0)/typedef, and (3) trivial zero-update physics bypass."
+    }
+  ]
+}

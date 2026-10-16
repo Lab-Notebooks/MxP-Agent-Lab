@@ -1,0 +1,68 @@
+# Co-Scientist Execution Budget Modes & Token/AlphaEvolve Estimator
+# Empirical cost & cache parameters calibrated from arXiv:2610.09995 (Table 2 & Fig. 7)
+# and ArgonClaw Gemini 4 Argon + Claude Opus 5.5 / Fable 5.1 Swarm benchmarks.
+
+[pricing_reference_usd_per_mtok]
+# Reference list rates for transparent scientific cost estimation
+input_uncached = 4.00
+input_cache_write = 5.00
+input_cache_read = 0.40
+output = 20.00
+alphaevolve_eval_unit_usd = 0.035
+
+[modes.cheap]
+label = "Cheap (Single Author-Reviewer Loop / Economy)"
+orchestration_pattern = "csloop"
+root_model = "gemini-launch-candidate-high"
+subagent_model = "flash"
+council_review = "gate_2_and_4_only"
+max_cycles_per_stage = 3
+max_iters_per_cycle = 15
+max_tool_calls_per_pass = 25
+hotspots_in_scope = ["advect", "redistance"]
+alphaevolve_generations = 5
+alphaevolve_population = 8
+alphaevolve_eval_grid = "64x64"
+estimated_input_mtok = 1.25
+estimated_output_mtok = 0.09
+estimated_cache_read_ratio = 0.92
+estimated_alphaevolve_evals = 40
+estimated_wallclock_minutes = 10
+
+[modes.balanced]
+label = "Balanced (Hybrid Co-Scientist: Fan-Out Profile/Verify + Bounded Loop Build/Evolve)"
+orchestration_pattern = "hybrid_csloop_fanout"
+root_model = "gemini-launch-candidate-high"
+subagent_model = "flash"
+council_review = "all_gates_opus_fable"
+max_cycles_per_stage = 5
+max_iters_per_cycle = 25
+max_tool_calls_per_pass = 40
+hotspots_in_scope = ["advect", "redistance", "init", "driver"]
+alphaevolve_generations = 15
+alphaevolve_population = 16
+alphaevolve_eval_grid = "128x128"
+estimated_input_mtok = 4.60
+estimated_output_mtok = 0.32
+estimated_cache_read_ratio = 0.91
+estimated_alphaevolve_evals = 240
+estimated_wallclock_minutes = 28
+
+[modes.turbo]
+label = "Turbo (Full 12-Agent ArgonClaw Swarm + Multi-Island Coupled AlphaEvolve)"
+orchestration_pattern = "full_swarm_12_agents"
+root_model = "gemini-launch-candidate-high"
+subagent_model = "gemini-launch-candidate-high"
+council_review = "continuous_adversarial_opus_fable"
+max_cycles_per_stage = 8
+max_iters_per_cycle = 40
+max_tool_calls_per_pass = 60
+hotspots_in_scope = ["advect", "redistance", "init", "driver", "coupled"]
+alphaevolve_generations = 40
+alphaevolve_population = 32
+alphaevolve_eval_grid = "128x128_and_256x256"
+estimated_input_mtok = 14.20
+estimated_output_mtok = 0.95
+estimated_cache_read_ratio = 0.94
+estimated_alphaevolve_evals = 1280
+estimated_wallclock_minutes = 55

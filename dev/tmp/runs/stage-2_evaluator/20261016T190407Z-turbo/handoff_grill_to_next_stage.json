@@ -1,0 +1,22 @@
+{
+  "from_stage": "stage-2_evaluator",
+  "to_stage": "stage-3_evolve",
+  "context_carried_forward": {
+    "frozen_evaluator_sha256": "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9",
+    "baseline_fp64_score": 1.0,
+    "seed_fp32_score": 2.412,
+    "cheats_rejected": "3/3"
+  },
+  "grill_me_questions": [
+    {
+      "id": "Q2_1_evolution_hints",
+      "question": "Stage 2 froze evaluator.py (SHA256: c17276900ec83eb7...) after rejecting 3/3 Red-Team cheats. For Stage 3 (AlphaEvolve on live engine 603936599140/alphaevolve-engine), which numerical compensation strategies should be permitted in the evolution prompt?",
+      "default_recommendation": "Allow Knuth/Priest TwoSum, FastTwoSum, Ozaki split-accumulators in pure FP32, and branchless WENO5 epsilon scaling."
+    },
+    {
+      "id": "Q2_2_search_topology",
+      "question": "Should Stage 3 evolve the 4 hotspots in parallel islands first and then synthesize a coupled 4-kernel candidate in runs/stage-3_evolve/?",
+      "default_recommendation": "Yes \u2014 run per-hotspot evolution islands (advect, redistance, init, driver) + coupled evaluation, keeping all candidates strictly in dev/tmp/runs/stage-3_evolve/."
+    }
+  ]
+}

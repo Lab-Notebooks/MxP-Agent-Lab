@@ -1,0 +1,47 @@
+# Stage 0: Tailored Socratic /grill-me Interview & Co-Scientist Intake
+project: "Lab-Notebooks/MxP-MiniApp-Bubble"
+domain: "2D Incompressible Multiphase Level-Set Advection & Hamilton-Jacobi Redistancing"
+created_at: "2026-10-16"
+
+categories:
+  1_physics_and_numerical_invariants:
+    question: "Which conservation laws, physical symmetries, and error norms must hold across all evolved candidates?"
+    scientist_response:
+      primary_metric: "RMSE(phi) at T=1.0 on 128x128 vortex-in-a-box grid <= 1.0e-7 vs FP64 reference"
+      secondary_invariants:
+        - "Velocity field incompressibility L_inf(div u) <= 1.0e-12"
+        - "Signed-distance Eikonal property |grad(phi)| = 1 preserved across redistancing sweeps"
+        - "Multi-geometry robustness (single bubble, Zalesak slotted disk, twin coalescing vortices)"
+  2_hardware_and_structural_refactor:
+    question: "What is the target hardware architecture, and is a pre-evolution structural refactoring step required?"
+    scientist_response:
+      target_hardware: "x86_64 AVX-512 CPU + Multi-Rank MPI (np=1,2,4), portable to GPU/TPU"
+      refactor_required: true
+      refactor_plan: "Isolate interior stencil buffers in dev/agy/src/stage-1..4 and introduce error-free transformation primitives (TwoSum / FastTwoSum / Ozaki split-accumulators) in pure FP32."
+  3_checkers_and_supporting_libraries:
+    question: "Which static/dynamic numerical checkers, profilers, and supporting libraries must be installed in Stage 0 and packaged in Stage 5?"
+    scientist_response:
+      required_checkers:
+        - name: "FPChecker"
+          path: "dev/tools/FPChecker"
+          purpose: "LLVM/Clang instrumentation pass detecting catastrophic cancellation, NaN, Inf, and subnormal underflow"
+        - name: "RAPTOR"
+          path: "dev/tools/RAPTOR"
+          purpose: "LLVM bit-width sensitivity sweep across FP64, FP32, BF16, FP16"
+        - name: "Wall-Clock & Cycle Hotspot Profiler"
+          path: "dev/agy/src/stage-1_profile/profile_hotspots.cpp"
+          purpose: "Per-kernel runtime breakdown (advect, redistance, init, driver)"
+        - name: "AlphaEvolve Discovery Engine CLI (ae)"
+          path: "/opt/argonclaw/.venv/bin/ae"
+          purpose: "Live AlphaEvolve v1alpha API orchestration on project 603936599140 / engine alphaevolve-engine"
+  4_algorithmic_freedom_and_guardrails:
+    question: "What code modifications are permitted vs. strictly forbidden?"
+    scientist_response:
+      allowed: "Full algorithmic modification inside staged trees (dev/agy/src/stage-1..4/), including compensated FP32 summation (TwoSum/Ozaki), WENO5 smoothness weight rescaling, and FMA scheduling."
+      forbidden: "Zero 'double', 'long double', '__float128', or obfuscated 64-bit types inside EVOLVE-BLOCKs; zero hardcoded lookup tables; root src/ untouched until Stage 4 promotion."
+  5_budget_and_token_estimator_mode:
+    question: "Which execution budget mode (cheap, balanced, turbo) and AlphaEvolve / token quota should govern this campaign?"
+    scientist_response:
+      selected_mode: "turbo"
+      available_modes: ["cheap", "balanced", "turbo"]
+      auto_gate_with_council: true

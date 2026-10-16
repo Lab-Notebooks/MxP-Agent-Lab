@@ -1,0 +1,22 @@
+# CodeScribe / Co-Scientist Bounded Execution Policy for stage-1_profile
+[stage]
+id = "stage-1_profile"
+title = "Stage 1: Profile & Precision Sensitivity Analysis"
+gate_question = "Are these the right hotspot kernels and EVOLVE-BLOCK boundaries to evolve?"
+staged_src_dir = "dev/agy/src/stage-1_profile"
+
+[limits]
+max_cycles = 5
+max_iters_per_cycle = 25
+max_tool_calls_per_pass = 40
+max_consecutive_failures = 3
+
+[tools]
+bash = ["python3", "g++", "make", "mpirun", "ae", "sha256sum"]
+
+[[chat.user]]
+content = """Each round, follow current_plan.md and the contract in desired_spec.md.
+Read the plan first, then the spec.
+Authority: current_plan.md and desired_spec.md are human-owned -- read, do not modify.
+agent_log.md is the only file in dev/transformations/stage-1_profile/ that the AI may modify.
+On conflict, the spec governs."""

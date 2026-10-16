@@ -1,0 +1,25 @@
+{
+  "schema_version": "2.0-co-scientist",
+  "stage": "stage-5_package",
+  "run_id": "20261016T190411Z-turbo",
+  "git_sha": "0cfd50f72bb7aab9e2342b4574947ee5bb2d5c4a",
+  "budget_mode": "turbo",
+  "staged_src_dir": "dev/agy/src/stage-5_package",
+  "desired_spec_sha256": "5ebe79ab9231516cd3850284a79e8c0fcadb05372cb068199b0c317258dac208",
+  "current_plan_sha256": "9043b3f927090618d17295f8bf939cf7b571c5eb3818a65496bf99941b77d4c0",
+  "evaluator_sha256": "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9",
+  "commands_executed": [
+    "Package reusable Antigravity Skill: dev/skill-distillation/mxp-co-scientist-workflow/SKILL.md",
+    "Package Containerized Antigravity Rollup: dev/skill-distillation/container_rollup/Containerfile"
+  ],
+  "metrics": {
+    "portable_skill_path": "dev/skill-distillation/mxp-co-scientist-workflow",
+    "skill_md_sha256": "4666a0cf8660ffe310e1d61cff5ad4f5cfd6be80b6fa2f13e5ff5716a937fc4f",
+    "containerfile_path": "dev/skill-distillation/container_rollup/Containerfile",
+    "swarm_join_script": "dev/skill-distillation/container_rollup/build_and_join_swarm.sh",
+    "init_project_cli": "python3 dev/workflow.py init-project <target-repo-path>"
+  },
+  "elapsed_seconds": 0.0066,
+  "timestamp_utc": "2026-10-16T19:04:11.626491+00:00",
+  "status": "COMPLETED_AND_GATE_APPROVED"
+}

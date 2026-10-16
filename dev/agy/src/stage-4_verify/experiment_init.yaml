@@ -1,0 +1,21 @@
+# Copyright 2026 Google LLC
+# GDM AlphaEvolve Per-Hotspot Experiment Specification (init)
+
+title: "Deforming Bubble Hotspot 3: Divergence-Free Streamfunction MAC Velocity (src/init.cpp)"
+problem_description: |
+  Optimize initLevelSetLowPrec, computeFaceVelocityLowPrec, and maxFaceSpeedsLowPrec in src/init.cpp to satisfy discrete incompressibility max|div_h u| <= 1.0e-12 across 64^2, 128^2, and 256^2 grids while operating strictly in 16-bit (_Float16) and 32-bit (float) precision (0 64-bit sd/pd instructions in objdump -d). Use a 3-slice float split of pi (kPiHi + kPiMid + kPiLo == pi_fp64) and telescoping prefix sums of cell-center trigonometric increments sin(2*pi*x_c)*sin(pi*dx).
+
+  STRICT RULES & CONSTRAINTS:
+  1. You MUST NOT use 64-bit floating-point types (`double`, `float64_t`, `__float128`, or `MPI_DOUBLE`) or 64-bit floating-point literals inside any `// EVOLVE-BLOCK-START ... // EVOLVE-BLOCK-END` section.
+  2. You MUST NOT add `#include` directives inside any `EVOLVE-BLOCK`.
+  3. The evaluator inspects both C++ source and `objdump -d` disassembly and rejects any candidate that emits 64-bit `sd`/`pd` instructions inside `*LowPrec` functions.
+program_language: "cpp"
+primary_metric: "composite_fitness"
+initial_score: 5.91
+
+seed_files:
+  - "src/init.cpp"
+
+evaluator:
+  script: "evaluator.py"
+  method: "evaluate_init_mxp"

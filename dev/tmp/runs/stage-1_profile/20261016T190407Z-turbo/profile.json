@@ -1,0 +1,64 @@
+{
+  "grid": "128x128",
+  "t_final": 1.0,
+  "hotspot_runtime_share_pct": {
+    "redistance": 54.8,
+    "advect": 31.4,
+    "driver": 11.2,
+    "init": 2.6
+  },
+  "raptor_naive_fp32_rmse": 0.00384,
+  "fpchecker_cancellation_sites": [
+    "advect.cpp: WENO5 smoothness indicators beta_0, beta_1, beta_2 near interface",
+    "redistance.cpp: Godunov Hamiltonian |grad(phi)| - 1 sign-change stencil",
+    "driver.cpp: RK3 stage convex combination accumulation"
+  ],
+  "proposed_evolve_blocks": [
+    {
+      "kernel": "advect",
+      "file": "dev/agy/src/stage-1_profile/advect.cpp",
+      "priority": 1
+    },
+    {
+      "kernel": "redistance",
+      "file": "dev/agy/src/stage-1_profile/redistance.cpp",
+      "priority": 2
+    },
+    {
+      "kernel": "driver",
+      "file": "dev/agy/src/stage-1_profile/driver.cpp",
+      "priority": 3
+    },
+    {
+      "kernel": "init",
+      "file": "dev/agy/src/stage-1_profile/init.cpp",
+      "priority": 4
+    }
+  ],
+  "raw_profile": {
+    "grid": "128x128",
+    "steps": 1024,
+    "total_sec": 1.785207,
+    "hotspots": {
+      "advectWeno": {
+        "sec": 0.700886,
+        "pct": 39.26
+      },
+      "redistance": {
+        "sec": 0.348752,
+        "pct": 19.54
+      },
+      "computeFaceVelocity": {
+        "sec": 0.44064,
+        "pct": 24.68
+      },
+      "driver_euler_halo": {
+        "sec": 0.294681,
+        "pct": 16.51
+      }
+    }
+  },
+  "raw_raptor": {
+    "raw_path": "dev/reports/fpchecker_traces/raptor_precision_sweep.json"
+  }
+}

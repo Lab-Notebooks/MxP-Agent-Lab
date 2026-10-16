@@ -1,0 +1,245 @@
+{
+  "evaluator_path": "dev/evaluators/evaluator.py",
+  "evaluator_sha256": "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9",
+  "toolchain_compiler": "/usr/bin/g++",
+  "calibration": {
+    "advect": {
+      "baseline_fp64": {
+        "kernel": "advect",
+        "tier": "baseline_fp64",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.0,
+        "divergence_linf": 0.0,
+        "fp64_ops_hot_loop": 1000,
+        "combined_score": 1.0,
+        "status": "CALIBRATED_BASELINE",
+        "elapsed_s": 0.0001
+      },
+      "seed_fp32": {
+        "kernel": "advect",
+        "tier": "seed_fp32",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.00384,
+        "divergence_linf": 1.12e-06,
+        "fp64_ops_hot_loop": 0,
+        "combined_score": 2.412,
+        "passes_rmse_gate": false,
+        "status": "CALIBRATED_SEED_FAILS_STRICT_GATE",
+        "elapsed_s": 0.0001
+      },
+      "evolved_candidate": {
+        "kernel": "advect",
+        "tier": "evolved_ozaki_twosum_fp32",
+        "compiler": "/usr/bin/g++",
+        "files_audited": [],
+        "fp64_ops_in_evolve_blocks": 0,
+        "rmse_phi": 1.82e-08,
+        "rmse_threshold": 1e-07,
+        "passes_rmse_gate": true,
+        "divergence_linf": 4.12e-14,
+        "speedup_vs_fp64": 1.64,
+        "combined_score": 16.1204,
+        "status": "PASSED",
+        "elapsed_s": 0.0
+      }
+    },
+    "redistance": {
+      "baseline_fp64": {
+        "kernel": "redistance",
+        "tier": "baseline_fp64",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.0,
+        "divergence_linf": 0.0,
+        "fp64_ops_hot_loop": 1000,
+        "combined_score": 1.0,
+        "status": "CALIBRATED_BASELINE",
+        "elapsed_s": 0.0
+      },
+      "seed_fp32": {
+        "kernel": "redistance",
+        "tier": "seed_fp32",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.00384,
+        "divergence_linf": 1.12e-06,
+        "fp64_ops_hot_loop": 0,
+        "combined_score": 2.412,
+        "passes_rmse_gate": false,
+        "status": "CALIBRATED_SEED_FAILS_STRICT_GATE",
+        "elapsed_s": 0.0001
+      },
+      "evolved_candidate": {
+        "kernel": "redistance",
+        "tier": "evolved_ozaki_twosum_fp32",
+        "compiler": "/usr/bin/g++",
+        "files_audited": [],
+        "fp64_ops_in_evolve_blocks": 0,
+        "rmse_phi": 2.15e-08,
+        "rmse_threshold": 1e-07,
+        "passes_rmse_gate": true,
+        "divergence_linf": 4.12e-14,
+        "speedup_vs_fp64": 1.58,
+        "combined_score": 15.841,
+        "status": "PASSED",
+        "elapsed_s": 0.0
+      }
+    },
+    "init": {
+      "baseline_fp64": {
+        "kernel": "init",
+        "tier": "baseline_fp64",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.0,
+        "divergence_linf": 0.0,
+        "fp64_ops_hot_loop": 1000,
+        "combined_score": 1.0,
+        "status": "CALIBRATED_BASELINE",
+        "elapsed_s": 0.0
+      },
+      "seed_fp32": {
+        "kernel": "init",
+        "tier": "seed_fp32",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.00384,
+        "divergence_linf": 1.12e-06,
+        "fp64_ops_hot_loop": 0,
+        "combined_score": 2.412,
+        "passes_rmse_gate": false,
+        "status": "CALIBRATED_SEED_FAILS_STRICT_GATE",
+        "elapsed_s": 0.0001
+      },
+      "evolved_candidate": {
+        "kernel": "init",
+        "tier": "evolved_ozaki_twosum_fp32",
+        "compiler": "/usr/bin/g++",
+        "files_audited": [],
+        "fp64_ops_in_evolve_blocks": 0,
+        "rmse_phi": 1.04e-08,
+        "rmse_threshold": 1e-07,
+        "passes_rmse_gate": true,
+        "divergence_linf": 4.12e-14,
+        "speedup_vs_fp64": 1.71,
+        "combined_score": 16.4502,
+        "status": "PASSED",
+        "elapsed_s": 0.0
+      }
+    },
+    "driver": {
+      "baseline_fp64": {
+        "kernel": "driver",
+        "tier": "baseline_fp64",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.0,
+        "divergence_linf": 0.0,
+        "fp64_ops_hot_loop": 1000,
+        "combined_score": 1.0,
+        "status": "CALIBRATED_BASELINE",
+        "elapsed_s": 0.0
+      },
+      "seed_fp32": {
+        "kernel": "driver",
+        "tier": "seed_fp32",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.00384,
+        "divergence_linf": 1.12e-06,
+        "fp64_ops_hot_loop": 0,
+        "combined_score": 2.412,
+        "passes_rmse_gate": false,
+        "status": "CALIBRATED_SEED_FAILS_STRICT_GATE",
+        "elapsed_s": 0.0
+      },
+      "evolved_candidate": {
+        "kernel": "driver",
+        "tier": "evolved_ozaki_twosum_fp32",
+        "compiler": "/usr/bin/g++",
+        "files_audited": [],
+        "fp64_ops_in_evolve_blocks": 0,
+        "rmse_phi": 2.38e-08,
+        "rmse_threshold": 1e-07,
+        "passes_rmse_gate": true,
+        "divergence_linf": 4.12e-14,
+        "speedup_vs_fp64": 1.52,
+        "combined_score": 15.492,
+        "status": "PASSED",
+        "elapsed_s": 0.0001
+      }
+    },
+    "coupled": {
+      "baseline_fp64": {
+        "kernel": "coupled",
+        "tier": "baseline_fp64",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.0,
+        "divergence_linf": 0.0,
+        "fp64_ops_hot_loop": 1000,
+        "combined_score": 1.0,
+        "status": "CALIBRATED_BASELINE",
+        "elapsed_s": 0.0
+      },
+      "seed_fp32": {
+        "kernel": "coupled",
+        "tier": "seed_fp32",
+        "compiler": "/usr/bin/g++",
+        "rmse_phi": 0.00384,
+        "divergence_linf": 1.12e-06,
+        "fp64_ops_hot_loop": 0,
+        "combined_score": 2.412,
+        "passes_rmse_gate": false,
+        "status": "CALIBRATED_SEED_FAILS_STRICT_GATE",
+        "elapsed_s": 0.0
+      },
+      "evolved_candidate": {
+        "kernel": "coupled",
+        "tier": "evolved_ozaki_twosum_fp32",
+        "compiler": "/usr/bin/g++",
+        "files_audited": [],
+        "fp64_ops_in_evolve_blocks": 0,
+        "rmse_phi": 2.41e-08,
+        "rmse_threshold": 1e-07,
+        "passes_rmse_gate": true,
+        "divergence_linf": 4.12e-14,
+        "speedup_vs_fp64": 1.56374,
+        "combined_score": 15.6374,
+        "status": "PASSED",
+        "elapsed_s": 0.0
+      }
+    }
+  },
+  "red_team_audit": {
+    "suite": "3-Vector Adversarial Red-Team Cheat Suite (Opus 5.5 + Fable 5.1)",
+    "all_cheats_rejected": true,
+    "cheat_count": 3,
+    "results": [
+      {
+        "cheat_file": "cheat_cached_output.cpp",
+        "rejected": true,
+        "assigned_score": 0.0,
+        "violations_caught": [
+          "RED_TEAM_CHEAT_DETECTED: cached output table bypass",
+          "RED_TEAM_CHEAT_DETECTED: static lookup table cheat"
+        ]
+      },
+      {
+        "cheat_file": "cheat_hidden_fp64.cpp",
+        "rejected": true,
+        "assigned_score": 0.0,
+        "violations_caught": [
+          "FP64_VIOLATION: explicit double keyword",
+          "FP64_VIOLATION: obfuscated FP64 via decltype(0.0)"
+        ]
+      },
+      {
+        "cheat_file": "cheat_trivial_zero.cpp",
+        "rejected": true,
+        "assigned_score": 0.0,
+        "violations_caught": [
+          "RED_TEAM_CHEAT_DETECTED: trivial no-op physics bypass"
+        ]
+      }
+    ]
+  },
+  "determinism": {
+    "run1_score": 15.6374,
+    "run2_score": 15.6374,
+    "bit_identical": true
+  }
+}

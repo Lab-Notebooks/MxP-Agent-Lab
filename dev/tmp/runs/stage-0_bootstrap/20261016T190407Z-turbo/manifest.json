@@ -1,0 +1,53 @@
+{
+  "schema_version": "2.0-co-scientist",
+  "stage": "stage-0_bootstrap",
+  "run_id": "20261016T190407Z-turbo",
+  "git_sha": "0cfd50f72bb7aab9e2342b4574947ee5bb2d5c4a",
+  "budget_mode": "turbo",
+  "staged_src_dir": "dev/agy/src/stage-0_bootstrap",
+  "desired_spec_sha256": "3a521ea1d418701031b4d69ff98325e60bfce7bca12e1d23b0d38a5449ed3de7",
+  "current_plan_sha256": "d118c7d7cac2662ff17eedd48cb78508930ba623c658a3c48bd70e040c3dfd78",
+  "evaluator_sha256": "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9",
+  "commands_executed": [
+    "bash dev/agy/src/stage-0_bootstrap/install_dependencies.sh"
+  ],
+  "metrics": {
+    "target_hardware": "x86_64 AVX-512 + Multi-Rank MPI (portable to GPU/TPU)",
+    "hardware_refactor_required": true,
+    "verified_checkers": [
+      "FPChecker",
+      "RAPTOR",
+      "wallclock_hotspot_timer",
+      "ae_cli_603936599140"
+    ],
+    "dependencies_lock_sha256": "1f11d31e429250f9819e1f169c721367681c29d58d2d65e22d3b30838806b161",
+    "budget_estimate": {
+      "mode": "turbo",
+      "label": "Turbo (Full 12-Agent ArgonClaw Swarm + Multi-Island Coupled AlphaEvolve)",
+      "orchestration_pattern": "full_swarm_12_agents",
+      "root_model": "gemini-launch-candidate-high",
+      "subagent_model": "gemini-launch-candidate-high",
+      "hotspots_in_scope": [
+        "advect",
+        "redistance",
+        "init",
+        "driver",
+        "coupled"
+      ],
+      "alphaevolve_generations": 40,
+      "alphaevolve_population": 32,
+      "alphaevolve_eval_grid": "128x128_and_256x256",
+      "estimated_input_mtok": 14.2,
+      "estimated_output_mtok": 0.95,
+      "estimated_cache_read_ratio": 0.94,
+      "estimated_alphaevolve_evals": 1280,
+      "estimated_llm_cost_usd": 28.17,
+      "estimated_alphaevolve_cost_usd": 44.8,
+      "estimated_total_cost_usd": 72.97,
+      "estimated_wallclock_minutes": 55
+    }
+  },
+  "elapsed_seconds": 0.0139,
+  "timestamp_utc": "2026-10-16T19:04:07.650196+00:00",
+  "status": "COMPLETED_AND_GATE_APPROVED"
+}

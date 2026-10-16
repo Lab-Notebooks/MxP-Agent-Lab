@@ -1,0 +1,25 @@
+{
+  "mode": "turbo",
+  "label": "Turbo (Full 12-Agent ArgonClaw Swarm + Multi-Island Coupled AlphaEvolve)",
+  "orchestration_pattern": "full_swarm_12_agents",
+  "root_model": "gemini-launch-candidate-high",
+  "subagent_model": "gemini-launch-candidate-high",
+  "hotspots_in_scope": [
+    "advect",
+    "redistance",
+    "init",
+    "driver",
+    "coupled"
+  ],
+  "alphaevolve_generations": 40,
+  "alphaevolve_population": 32,
+  "alphaevolve_eval_grid": "128x128_and_256x256",
+  "estimated_input_mtok": 14.2,
+  "estimated_output_mtok": 0.95,
+  "estimated_cache_read_ratio": 0.94,
+  "estimated_alphaevolve_evals": 1280,
+  "estimated_llm_cost_usd": 28.17,
+  "estimated_alphaevolve_cost_usd": 44.8,
+  "estimated_total_cost_usd": 72.97,
+  "estimated_wallclock_minutes": 55
+}

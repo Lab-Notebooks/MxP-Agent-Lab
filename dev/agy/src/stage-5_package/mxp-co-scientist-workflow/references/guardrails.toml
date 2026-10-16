@@ -1,0 +1,20 @@
+# Enforced Architectural Guardrails (Principle P5 of arXiv:2610.09995)
+
+[authority]
+# Human-owned contract files inside dev/transformations/<stage>/ that agents cannot mutate during a run
+protected_stage_files = ["desired_spec.md", "current_plan.md", "approvals.toml", "loop.toml"]
+agent_writable_stage_files = ["agent_log.md"]
+root_src_protected_until_stage = "stage-4_verify"
+
+[shell_policy]
+allowed_binaries = ["python3", "g++", "gcc", "clang++", "make", "cmake", "mpirun", "ae", "git", "sha256sum"]
+block_unbounded_pipes = true
+max_consecutive_failed_iters = 3
+
+[numerical_guardrails]
+max_rmse_phi = 1.0e-7
+max_divergence_linf = 1.0e-12
+max_mass_drift_rel = 1.0e-5
+forbid_fp64_in_evolved_hotspots = true
+forbidden_tokens_in_evolve_blocks = ["double", "float64_t", "__float128", "long double"]
+require_red_team_cheat_rejection = true

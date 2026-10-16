@@ -1,0 +1,30 @@
+# Contextual HITL /grill-me Handoff Gate: stage-0_bootstrap -> stage-1_profile
+{
+  "from_stage": "stage-0_bootstrap",
+  "to_stage": "stage-1_profile",
+  "context_carried_forward": {
+    "detected_hardware": "x86_64 AVX-512 + Multi-Rank MPI (portable to GPU/TPU)",
+    "hardware_refactor_required": true,
+    "verified_checkers": [
+      "FPChecker",
+      "RAPTOR",
+      "wallclock_hotspot_timer",
+      "ae_cli_603936599140"
+    ],
+    "selected_budget_mode": "turbo",
+    "estimated_total_tokens_mtok": 15.15,
+    "estimated_alphaevolve_evals": 1280
+  },
+  "grill_me_questions": [
+    {
+      "id": "Q0_1_hotspot_scope",
+      "question": "Stage 0 verified FPChecker, RAPTOR, and gcc/MPI toolchains, and detected that interior stencil state should be isolated for FP32 evolution. Should Stage 1 profile all 4 core kernels (advect, redistance, init, driver) on the 128x128 vortex benchmark?",
+      "default_recommendation": "Yes \u2014 profile all 4 kernels (advect, redistance, init, driver) with wall-clock timers, FPChecker cancellation traces, and RAPTOR bit-width sweeps (FP64, FP32, BF16, FP16)."
+    },
+    {
+      "id": "Q0_2_budget_lock",
+      "question": "Confirm token & AlphaEvolve budget cap for this campaign (mode='turbo', est. 14.2M input tokens, 1280 AlphaEvolve evals, ~$72.97):",
+      "default_recommendation": "Approve 'turbo' mode and enforce loop.toml iteration caps per stage."
+    }
+  ]
+}

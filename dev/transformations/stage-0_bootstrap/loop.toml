@@ -1,0 +1,22 @@
+# CodeScribe / Co-Scientist Bounded Execution Policy for stage-0_bootstrap
+[stage]
+id = "stage-0_bootstrap"
+title = "Stage 0: Tailored /grill-me Intake, Hardware Refactor Check, Budget Estimator & Dependency Provisioning"
+gate_question = "Are the physics invariants, hardware refactor plan, budget mode, and required checkers (FPChecker, RAPTOR, ae CLI) locked and installed?"
+staged_src_dir = "dev/agy/src/stage-0_bootstrap"
+
+[limits]
+max_cycles = 5
+max_iters_per_cycle = 25
+max_tool_calls_per_pass = 40
+max_consecutive_failures = 3
+
+[tools]
+bash = ["python3", "g++", "make", "mpirun", "ae", "sha256sum"]
+
+[[chat.user]]
+content = """Each round, follow current_plan.md and the contract in desired_spec.md.
+Read the plan first, then the spec.
+Authority: current_plan.md and desired_spec.md are human-owned -- read, do not modify.
+agent_log.md is the only file in dev/transformations/stage-0_bootstrap/ that the AI may modify.
+On conflict, the spec governs."""

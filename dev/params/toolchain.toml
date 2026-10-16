@@ -1,0 +1,27 @@
+# Portable Toolchain & Environment Configuration (Stage 0 Lock)
+# Replaces hardcoded compiler paths in Makefile / evaluators.
+
+[compilers]
+cxx_candidates = ["/opt/rh/gcc-toolset-15/root/usr/bin/g++", "/usr/bin/g++", "g++", "clang++"]
+cc_candidates = ["/opt/rh/gcc-toolset-15/root/usr/bin/gcc", "/usr/bin/gcc", "gcc", "clang"]
+cxxflags_base = ["-O3", "-std=c++17", "-Wall"]
+cxxflags_fp_strict = ["-fno-fast-math", "-ffp-contract=off"]
+mpi_launcher = "mpirun"
+mpi_ranks_verify = [1, 2, 4]
+
+[checkers]
+fpchecker_dir = "dev/tools/FPChecker"
+raptor_dir = "dev/tools/RAPTOR"
+ae_cli_bin = "/opt/argonclaw/.venv/bin/ae"
+ae_skills_dir = "dev/tools/alpha_evolve_skills"
+
+[alphaevolve_endpoint]
+organization = "jacobsohn.altostrat.com"
+project_id = "alphaevolve-argolis-511205"
+project_number = "603936599140"
+location = "global"
+collection = "default_collection"
+engine_id = "alphaevolve-engine"
+session_id = "15541367028299861796"
+base_url = "https://discoveryengine.googleapis.com/v1alpha"
+service_account = "argolis-agent-sa@agentproject-511205.iam.gserviceaccount.com"

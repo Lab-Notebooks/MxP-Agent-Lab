@@ -1,0 +1,21 @@
+# Copyright 2026 Google LLC
+# GDM AlphaEvolve Per-Hotspot Experiment Specification (redistance)
+
+title: "Deforming Bubble Hotspot 2: Godunov Eikonal Redistancing (src/redistance.cpp)"
+problem_description: |
+  Optimize lsPseudoTimestepLowPrec, godunovGradMagLowPrec, redistanceIterationLowPrec, and redistanceLowPrec in src/redistance.cpp to satisfy the Eikonal invariant max||grad phi| - 1| <= 0.05 with zero interface sign flips and zero-contour drift <= 0.05*dx while operating strictly in 16-bit (_Float16) and 32-bit (float) precision (0 64-bit sd/pd instructions in objdump -d).
+
+  STRICT RULES & CONSTRAINTS:
+  1. You MUST NOT use 64-bit floating-point types (`double`, `float64_t`, `__float128`, or `MPI_DOUBLE`) or 64-bit floating-point literals inside any `// EVOLVE-BLOCK-START ... // EVOLVE-BLOCK-END` section.
+  2. You MUST NOT add `#include` directives inside any `EVOLVE-BLOCK`.
+  3. The evaluator inspects both C++ source and `objdump -d` disassembly and rejects any candidate that emits 64-bit `sd`/`pd` instructions inside `*LowPrec` functions.
+program_language: "cpp"
+primary_metric: "composite_fitness"
+initial_score: 3.5
+
+seed_files:
+  - "src/redistance.cpp"
+
+evaluator:
+  script: "evaluator.py"
+  method: "evaluate_redistance_mxp"

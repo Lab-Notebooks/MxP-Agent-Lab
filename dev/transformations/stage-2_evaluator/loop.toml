@@ -1,0 +1,22 @@
+# CodeScribe / Co-Scientist Bounded Execution Policy for stage-2_evaluator
+[stage]
+id = "stage-2_evaluator"
+title = "Stage 2: Build Unified Evaluator & Adversarial Red-Team Cheat Audit"
+gate_question = "Does this score mean what I think it means, and do all 3 planted cheat vectors score 0.0?"
+staged_src_dir = "dev/agy/src/stage-2_evaluator"
+
+[limits]
+max_cycles = 5
+max_iters_per_cycle = 25
+max_tool_calls_per_pass = 40
+max_consecutive_failures = 3
+
+[tools]
+bash = ["python3", "g++", "make", "mpirun", "ae", "sha256sum"]
+
+[[chat.user]]
+content = """Each round, follow current_plan.md and the contract in desired_spec.md.
+Read the plan first, then the spec.
+Authority: current_plan.md and desired_spec.md are human-owned -- read, do not modify.
+agent_log.md is the only file in dev/transformations/stage-2_evaluator/ that the AI may modify.
+On conflict, the spec governs."""
