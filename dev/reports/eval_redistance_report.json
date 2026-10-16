@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "composite_fitness": 19.6243,
+  "sign_flips": 0,
+  "max_grad_error": 0.013016,
+  "contour_drift_cells": 0.0,
+  "forbidden_double_ops": 0,
+  "precision_stats": {
+    "fp16_tokens": 8,
+    "fp32_tokens": 82,
+    "fp16_asm_ops": 0,
+    "fp32_asm_ops": 242,
+    "fp64_asm_ops": 0,
+    "hw_weighted_cost": 492
+  },
+  "precision_bonus": 2.0,
+  "insight": {
+    "label": "REDISTANCE_EIKONAL_CONVERGED",
+    "text": "Godunov Eikonal redistancing max||grad|-1|=1.3016e-02, contour_drift=0.000e+00 cells, sign_flips=0. Zero FP64 instructions (fp64_asm_ops=0, _Float16 tokens=8, float tokens=82, hw_weighted_cost=492)."
+  }
+}

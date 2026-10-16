@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "composite_fitness": 16.83,
+  "order_l1": 5.05,
+  "order_linf": 4.83,
+  "l1_err_128x128": 3.941136e-06,
+  "forbidden_double_ops": 0,
+  "precision_stats": {
+    "fp16_tokens": 16,
+    "fp32_tokens": 100,
+    "fp16_asm_ops": 0,
+    "fp32_asm_ops": 534,
+    "fp64_asm_ops": 0,
+    "hw_weighted_cost": 1084
+  },
+  "precision_bonus": 2.0,
+  "insight": {
+    "label": "WENO5_OZAKI_EFT_CONVERGED",
+    "text": "WENO5 spatial order L1=5.05, Linf=4.83 (128x128 L1=3.941e-06). Zero FP64 instructions (fp64_asm_ops=0, _Float16 tokens=16, float tokens=100, hw_weighted_cost=1084)."
+  }
+}

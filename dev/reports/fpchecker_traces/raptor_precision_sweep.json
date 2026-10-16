@@ -1,0 +1,10 @@
+{
+  "tool": "RAPTOR LLVM-21 Pass (LLVMRaptor-21.so + libRaptor-RT-21.a)",
+  "grid_samples": 14884,
+  "hotspots": {
+    "advectWeno": {"fp32_e8m23_rmse": 2.210509e-08, "tf32_e8m10_rmse": 2.167263e-04, "bf16_e8m7_rmse": 1.628963e-03, "fp16_e5m10_rmse": -nan},
+    "redistance": {"fp32_e8m23_rmse": 1.261462e-08, "tf32_e8m10_rmse": 7.366701e-05, "bf16_e8m7_rmse": 5.784561e-04, "fp16_e5m10_rmse": 7.366701e-05},
+    "computeFaceVelocity": {"fp32_e8m23_rmse": 7.057626e-08, "tf32_e8m10_rmse": 6.622846e-04, "bf16_e8m7_rmse": 3.325390e-03, "fp16_e5m10_rmse": 6.622846e-04},
+    "driver_euler": {"fp32_e8m23_rmse": 1.268812e-08, "tf32_e8m10_rmse": 7.473814e-05, "bf16_e8m7_rmse": 5.789699e-04, "fp16_e5m10_rmse": 7.473814e-05}
+  }
+}

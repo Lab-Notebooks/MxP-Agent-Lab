@@ -1,0 +1,42 @@
+[
+  {
+    "case_id": "CFL_0.10_Nominal",
+    "cfl": 0.1,
+    "redist_freq": 10,
+    "sign_flips": 0,
+    "max_div": 1.2e-15,
+    "status": "STABLE"
+  },
+  {
+    "case_id": "CFL_0.25_Standard",
+    "cfl": 0.25,
+    "redist_freq": 10,
+    "sign_flips": 0,
+    "max_div": 2.4e-15,
+    "status": "STABLE"
+  },
+  {
+    "case_id": "CFL_0.50_Aggressive",
+    "cfl": 0.5,
+    "redist_freq": 5,
+    "sign_flips": 0,
+    "max_div": 4.1e-15,
+    "status": "STABLE"
+  },
+  {
+    "case_id": "CFL_0.75_Limit",
+    "cfl": 0.75,
+    "redist_freq": 2,
+    "sign_flips": 0,
+    "max_div": 8.9e-15,
+    "status": "STABLE"
+  },
+  {
+    "case_id": "Vortex_Shear_High",
+    "cfl": 0.3,
+    "redist_freq": 1,
+    "sign_flips": 0,
+    "max_div": 3.7e-15,
+    "status": "STABLE"
+  }
+]

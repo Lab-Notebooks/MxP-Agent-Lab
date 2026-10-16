@@ -1,0 +1,21 @@
+#FPCHECKER: Initializing...
+bubble: Deforming Bubble mini-app
+bubble: params         : ../params/bubble.ini  [nx=64]  [ny=64]  [max_steps=10]  [plot_interval=0]
+bubble: global mesh    : 64 x 64  on [0,1] x [0,1]
+bubble: cell size      : dx 0.015625  dy 0.015625
+bubble: guard cells    : 3
+bubble: process grid   : 1 x 1  (1 ranks)
+bubble: local mesh     : 64 x 64
+bubble: tmax 2  cfl 0.05  fixed_dt 0  max_steps 10  reverse_time false
+bubble: ls_iterations  : 2
+bubble: outdir         : out  (plot every 0, history every 1)
+bubble: init dfun      : analytic err 0.000e+00
+bubble: steps          : 10  to t = 0.003913  (last dt 3.912532e-04)
+bubble: area           : 0.031642569 -> 0.031616244   drift 0.0832%
+bubble: max divergence : 2.487e-14  (invariant 6 tol 1.0e-12)
+bubble: sign flips     : 0 (total over the run)
+bubble: |dfun - dfun(t=0)| at t_end : 8.898412e-03   (deformed, not reversed)
+bubble: output         : 2 plot(s) + 11 history row(s) in out/
+bubble: wall time      : 32.90 s on 1 rank(s)
+bubble: done
+#FPCHECKER: Finalizing and writing traces...

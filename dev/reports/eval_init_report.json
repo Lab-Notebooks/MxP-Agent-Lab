@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "composite_fitness": 17.0,
+  "max_divergence": 1.776e-14,
+  "max_phi_err": 0.0,
+  "divergence_score": 15.0,
+  "forbidden_double_ops": 0,
+  "precision_stats": {
+    "fp16_tokens": 46,
+    "fp32_tokens": 112,
+    "fp16_asm_ops": 0,
+    "fp32_asm_ops": 863,
+    "fp64_asm_ops": 0,
+    "hw_weighted_cost": 1772
+  },
+  "precision_bonus": 2.0,
+  "status": "CONVERGED",
+  "insight": {
+    "label": "INIT_STREAMFUNCTION_DIVERGENCE_FREE",
+    "text": "3-slice Ozaki pi split and prefix-summed streamfunction achieved max|div u|=1.776e-14 <= 1.0e-12 and analytic phi err=0.000e+00. Zero FP64 instructions (fp64_asm_ops=0, _Float16 tokens=46, float tokens=112)."
+  }
+}

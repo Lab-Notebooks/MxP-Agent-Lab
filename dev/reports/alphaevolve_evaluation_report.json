@@ -1,0 +1,18 @@
+{
+  "scores": {
+    "scores": [
+      {
+        "metric": "trajectory_accuracy_score",
+        "score": 15.637352228180042
+      }
+    ]
+  },
+  "insights": {
+    "insights": [
+      {
+        "label": "TRAJECTORY_MSE_SUMMARY",
+        "text": "MPI process grid: 2 x 2  (4 ranks). Evaluated 9 frames up to step 1024 (t=0.2001). Trajectory MSE = 1.304877e-16 (RMSE = 1.142312e-08), Interface-band MSE (|phi|<=5*dx) = 3.691773e-19 (RMSE = 6.075997e-10), Final-frame MSE = 1.215813e-16, Final Linf = 2.983339e-08. Peak frame MSE occurred at step 256 (t=0.0500, MSE=1.354105e-16, Linf=2.982115e-08). Area drift: candidate=0.2978% vs FP64_ref=0.2978% (delta=+0.0000 pp). Source token counts in EVOLVE-BLOCKs: _Float16=80, float=359."
+      }
+    ]
+  }
+}

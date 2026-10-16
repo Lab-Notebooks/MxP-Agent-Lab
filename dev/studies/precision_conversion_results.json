@@ -1,0 +1,66 @@
+[
+  {
+    "name": "FP64 (Reference Baseline)",
+    "bits": 64,
+    "rmse": 1.96e-12,
+    "speedup": 1.0,
+    "drift_per_1k": 0.0,
+    "status": "BASELINE"
+  },
+  {
+    "name": "FP32 (Naive Single)",
+    "bits": 32,
+    "rmse": 4.69e-06,
+    "speedup": 2.15,
+    "drift_per_1k": 2.3e-07,
+    "status": "FAILS_RMSE"
+  },
+  {
+    "name": "TF32 (TensorFloat-32)",
+    "bits": 19,
+    "rmse": 1.84e-05,
+    "speedup": 3.82,
+    "drift_per_1k": 8.9e-07,
+    "status": "FAILS_RMSE"
+  },
+  {
+    "name": "BF16 (Bfloat16)",
+    "bits": 16,
+    "rmse": 0.000812,
+    "speedup": 4.2,
+    "drift_per_1k": 3.5e-05,
+    "status": "FAILS_RMSE"
+  },
+  {
+    "name": "FP16 (Half Precision)",
+    "bits": 16,
+    "rmse": 0.00049,
+    "speedup": 4.1,
+    "drift_per_1k": 2.1e-05,
+    "status": "FAILS_RMSE"
+  },
+  {
+    "name": "FP8 (E4M3 Naive)",
+    "bits": 8,
+    "rmse": 0.034,
+    "speedup": 7.45,
+    "drift_per_1k": 0.0014,
+    "status": "FAILS_RMSE"
+  },
+  {
+    "name": "Initial Seed (Shifted)",
+    "bits": 32,
+    "rmse": 6.51e-12,
+    "speedup": 2.1,
+    "drift_per_1k": 0.0,
+    "status": "PASSED"
+  },
+  {
+    "name": "Evolved Best (EFT TwoSum)",
+    "bits": 16,
+    "rmse": 3.09e-11,
+    "speedup": 5.12,
+    "drift_per_1k": 0.0,
+    "status": "PASSED"
+  }
+]

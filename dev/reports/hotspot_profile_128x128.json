@@ -1,0 +1,11 @@
+{
+  "grid": "128x128",
+  "steps": 1024,
+  "total_sec": 1.785207,
+  "hotspots": {
+    "advectWeno": {"sec": 0.700886, "pct": 39.26},
+    "redistance": {"sec": 0.348752, "pct": 19.54},
+    "computeFaceVelocity": {"sec": 0.440640, "pct": 24.68},
+    "driver_euler_halo": {"sec": 0.294681, "pct": 16.51}
+  }
+}

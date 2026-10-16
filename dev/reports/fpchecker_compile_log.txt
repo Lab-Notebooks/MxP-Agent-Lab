@@ -1,0 +1,427 @@
+In file included from <built-in>:1:
+In file included from /var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/Runtime_cpu.h:5:
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:363:44: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  363 |         fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      |                                  ~~~~      ^~~~~~~~~~
+      |                                  %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:365:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  365 |         fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:366:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  366 |         fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:367:43: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  367 |         fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      |                                 ~~~~      ^~~~~~~~~
+      |                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:368:53: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  368 |         fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      |                                           ~~~~      ^~~~~~~~~~~~~~~~~~~
+      |                                           %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:369:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  369 |         fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:370:50: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  370 |         fprintf(fp, "\t\"comparison\": %llu,\n", next->comparison);
+      |                                        ~~~~      ^~~~~~~~~~~~~~~~
+      |                                        %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:371:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  371 |         fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:372:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  372 |         fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:373:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  373 |         fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:374:55: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  374 |         fprintf(fp, "\t\"latent_underflow\": %llu\n", next->latent_underflow);
+      |                                              ~~~~     ^~~~~~~~~~~~~~~~~~~~~~
+      |                                              %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:385:45: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  385 |         fprintf(fpe, "\t\"line\": %llu,\n", next->line);
+      |                                   ~~~~      ^~~~~~~~~~
+      |                                   %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:396:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  396 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp32_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:411:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  411 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp64_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+14 warnings generated.
+Running ModulePass on module: src_ref/advect.cpp
+#FPCHECKER: Instrumented 249 @ src_ref/advect.cpp
+In file included from <built-in>:1:
+In file included from /var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/Runtime_cpu.h:5:
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:363:44: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  363 |         fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      |                                  ~~~~      ^~~~~~~~~~
+      |                                  %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:365:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  365 |         fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:366:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  366 |         fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:367:43: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  367 |         fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      |                                 ~~~~      ^~~~~~~~~
+      |                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:368:53: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  368 |         fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      |                                           ~~~~      ^~~~~~~~~~~~~~~~~~~
+      |                                           %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:369:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  369 |         fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:370:50: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  370 |         fprintf(fp, "\t\"comparison\": %llu,\n", next->comparison);
+      |                                        ~~~~      ^~~~~~~~~~~~~~~~
+      |                                        %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:371:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  371 |         fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:372:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  372 |         fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:373:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  373 |         fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:374:55: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  374 |         fprintf(fp, "\t\"latent_underflow\": %llu\n", next->latent_underflow);
+      |                                              ~~~~     ^~~~~~~~~~~~~~~~~~~~~~
+      |                                              %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:385:45: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  385 |         fprintf(fpe, "\t\"line\": %llu,\n", next->line);
+      |                                   ~~~~      ^~~~~~~~~~
+      |                                   %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:396:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  396 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp32_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:411:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  411 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp64_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+14 warnings generated.
+Running ModulePass on module: src_ref/driver.cpp
+#FPCHECKER: Instrumented 15 @ src_ref/driver.cpp
+In file included from <built-in>:1:
+In file included from /var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/Runtime_cpu.h:5:
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:363:44: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  363 |         fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      |                                  ~~~~      ^~~~~~~~~~
+      |                                  %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:365:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  365 |         fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:366:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  366 |         fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:367:43: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  367 |         fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      |                                 ~~~~      ^~~~~~~~~
+      |                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:368:53: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  368 |         fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      |                                           ~~~~      ^~~~~~~~~~~~~~~~~~~
+      |                                           %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:369:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  369 |         fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:370:50: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  370 |         fprintf(fp, "\t\"comparison\": %llu,\n", next->comparison);
+      |                                        ~~~~      ^~~~~~~~~~~~~~~~
+      |                                        %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:371:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  371 |         fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:372:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  372 |         fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:373:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  373 |         fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:374:55: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  374 |         fprintf(fp, "\t\"latent_underflow\": %llu\n", next->latent_underflow);
+      |                                              ~~~~     ^~~~~~~~~~~~~~~~~~~~~~
+      |                                              %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:385:45: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  385 |         fprintf(fpe, "\t\"line\": %llu,\n", next->line);
+      |                                   ~~~~      ^~~~~~~~~~
+      |                                   %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:396:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  396 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp32_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:411:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  411 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp64_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+14 warnings generated.
+Running ModulePass on module: src_ref/grid.cpp
+#FPCHECKER: Instrumented 0 @ src_ref/grid.cpp
+In file included from <built-in>:1:
+In file included from /var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/Runtime_cpu.h:5:
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:363:44: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  363 |         fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      |                                  ~~~~      ^~~~~~~~~~
+      |                                  %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:365:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  365 |         fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:366:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  366 |         fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:367:43: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  367 |         fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      |                                 ~~~~      ^~~~~~~~~
+      |                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:368:53: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  368 |         fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      |                                           ~~~~      ^~~~~~~~~~~~~~~~~~~
+      |                                           %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:369:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  369 |         fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:370:50: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  370 |         fprintf(fp, "\t\"comparison\": %llu,\n", next->comparison);
+      |                                        ~~~~      ^~~~~~~~~~~~~~~~
+      |                                        %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:371:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  371 |         fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:372:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  372 |         fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:373:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  373 |         fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:374:55: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  374 |         fprintf(fp, "\t\"latent_underflow\": %llu\n", next->latent_underflow);
+      |                                              ~~~~     ^~~~~~~~~~~~~~~~~~~~~~
+      |                                              %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:385:45: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  385 |         fprintf(fpe, "\t\"line\": %llu,\n", next->line);
+      |                                   ~~~~      ^~~~~~~~~~
+      |                                   %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:396:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  396 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp32_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:411:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  411 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp64_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+14 warnings generated.
+Running ModulePass on module: src_ref/init.cpp
+#FPCHECKER: Instrumented 44 @ src_ref/init.cpp
+In file included from <built-in>:1:
+In file included from /var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/Runtime_cpu.h:5:
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:363:44: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  363 |         fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      |                                  ~~~~      ^~~~~~~~~~
+      |                                  %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:365:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  365 |         fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:366:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  366 |         fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:367:43: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  367 |         fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      |                                 ~~~~      ^~~~~~~~~
+      |                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:368:53: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  368 |         fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      |                                           ~~~~      ^~~~~~~~~~~~~~~~~~~
+      |                                           %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:369:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  369 |         fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:370:50: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  370 |         fprintf(fp, "\t\"comparison\": %llu,\n", next->comparison);
+      |                                        ~~~~      ^~~~~~~~~~~~~~~~
+      |                                        %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:371:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  371 |         fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:372:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  372 |         fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:373:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  373 |         fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:374:55: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  374 |         fprintf(fp, "\t\"latent_underflow\": %llu\n", next->latent_underflow);
+      |                                              ~~~~     ^~~~~~~~~~~~~~~~~~~~~~
+      |                                              %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:385:45: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  385 |         fprintf(fpe, "\t\"line\": %llu,\n", next->line);
+      |                                   ~~~~      ^~~~~~~~~~
+      |                                   %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:396:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  396 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp32_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:411:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  411 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp64_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+14 warnings generated.
+Running ModulePass on module: src_ref/io.cpp
+#FPCHECKER: Instrumented 25 @ src_ref/io.cpp
+In file included from <built-in>:1:
+In file included from /var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/Runtime_cpu.h:5:
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:363:44: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  363 |         fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      |                                  ~~~~      ^~~~~~~~~~
+      |                                  %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:365:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  365 |         fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:366:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  366 |         fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:367:43: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  367 |         fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      |                                 ~~~~      ^~~~~~~~~
+      |                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:368:53: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  368 |         fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      |                                           ~~~~      ^~~~~~~~~~~~~~~~~~~
+      |                                           %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:369:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  369 |         fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:370:50: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  370 |         fprintf(fp, "\t\"comparison\": %llu,\n", next->comparison);
+      |                                        ~~~~      ^~~~~~~~~~~~~~~~
+      |                                        %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:371:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  371 |         fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:372:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  372 |         fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:373:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  373 |         fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:374:55: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  374 |         fprintf(fp, "\t\"latent_underflow\": %llu\n", next->latent_underflow);
+      |                                              ~~~~     ^~~~~~~~~~~~~~~~~~~~~~
+      |                                              %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:385:45: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  385 |         fprintf(fpe, "\t\"line\": %llu,\n", next->line);
+      |                                   ~~~~      ^~~~~~~~~~
+      |                                   %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:396:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  396 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp32_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:411:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  411 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp64_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+14 warnings generated.
+Running ModulePass on module: src_ref/main.cpp
+#FPCHECKER: Instrumented 12 @ src_ref/main.cpp
+In file included from <built-in>:1:
+In file included from /var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/Runtime_cpu.h:5:
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:363:44: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  363 |         fprintf(fp, "\t\"line\": %llu,\n", next->line);
+      |                                  ~~~~      ^~~~~~~~~~
+      |                                  %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:365:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  365 |         fprintf(fp, "\t\"infinity_pos\": %llu,\n", next->infinity_pos);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:366:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  366 |         fprintf(fp, "\t\"infinity_neg\": %llu,\n", next->infinity_neg);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:367:43: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  367 |         fprintf(fp, "\t\"nan\": %llu,\n", next->nan);
+      |                                 ~~~~      ^~~~~~~~~
+      |                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:368:53: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  368 |         fprintf(fp, "\t\"division_zero\": %llu,\n", next->division_zero);
+      |                                           ~~~~      ^~~~~~~~~~~~~~~~~~~
+      |                                           %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:369:52: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  369 |         fprintf(fp, "\t\"cancellation\": %llu,\n", next->cancellation);
+      |                                          ~~~~      ^~~~~~~~~~~~~~~~~~
+      |                                          %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:370:50: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  370 |         fprintf(fp, "\t\"comparison\": %llu,\n", next->comparison);
+      |                                        ~~~~      ^~~~~~~~~~~~~~~~
+      |                                        %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:371:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  371 |         fprintf(fp, "\t\"underflow\": %llu,\n", next->underflow);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:372:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  372 |         fprintf(fp, "\t\"latent_infinity_pos\": %llu,\n", next->latent_infinity_pos);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:373:59: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  373 |         fprintf(fp, "\t\"latent_infinity_neg\": %llu,\n", next->latent_infinity_neg);
+      |                                                 ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                                 %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:374:55: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  374 |         fprintf(fp, "\t\"latent_underflow\": %llu\n", next->latent_underflow);
+      |                                              ~~~~     ^~~~~~~~~~~~~~~~~~~~~~
+      |                                              %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:385:45: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  385 |         fprintf(fpe, "\t\"line\": %llu,\n", next->line);
+      |                                   ~~~~      ^~~~~~~~~~
+      |                                   %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:396:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  396 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp32_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+/var/opt/argonclaw/shared_blackboard/repos/mxp-miniapp-bubble/dev/tools/FPChecker/src/FPC_Hashtable.h:411:49: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+  411 |             fprintf(fpe, "\t\t\"%d\": %llu", e, next->fp64_exponent_count[j]);
+      |                                       ~~~~      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      |                                       %lu
+14 warnings generated.
+Running ModulePass on module: src_ref/redistance.cpp
+#FPCHECKER: Instrumented 12 @ src_ref/redistance.cpp

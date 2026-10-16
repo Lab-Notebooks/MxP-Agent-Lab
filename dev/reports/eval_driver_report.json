@@ -1,0 +1,23 @@
+{
+  "passed": true,
+  "composite_fitness": 16.5539,
+  "area_drift": 0.002230627,
+  "steps_simulated": 150,
+  "sign_flips": 0,
+  "drift_score": 9.5539,
+  "forbidden_double_ops": 0,
+  "precision_stats": {
+    "fp16_tokens": 10,
+    "fp32_tokens": 65,
+    "fp16_asm_ops": 0,
+    "fp32_asm_ops": 157,
+    "fp64_asm_ops": 0,
+    "hw_weighted_cost": 324
+  },
+  "compensation_bonus": 2.0,
+  "status": "CONVERGED",
+  "insight": {
+    "label": "DRIVER_KAHAN_TWOSUM_CONVERGED",
+    "text": "Knuth TwoSum + FMA two_prod Euler integrator achieved area_drift=2.2306e-03, sign_flips=0 over 150 steps across np=1,2. Zero FP64 instructions (fp64_asm_ops=0, _Float16 tokens=10, float tokens=65)."
+  }
+}

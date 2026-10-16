@@ -1,0 +1,19 @@
+========================================
+         FPChecker Configuration        
+========================================
+
+Installation path: /usr/local
+
+Add the following to CFLAGS and/or CXXFLAGS:
+
+(1) For exceptions checking:
+-g -include /usr/local/src/Runtime_cpu.h -fpass-plugin=/usr/local/lib/libfpchecker_cpu.so
+
+(2) For rounding error tracking:
+-g -fno-vectorize -fno-slp-vectorize -include /usr/local/src/Runtime_error.h -fpass-plugin=/usr/local/lib/libfpchecker_error.so
+
+Wrappers are located here:
+/usr/local/bin/clang-fpchecker
+/usr/local/bin/clang++-fpchecker
+/usr/local/bin/mpicc-fpchecker
+/usr/local/bin/mpicxx-fpchecker
