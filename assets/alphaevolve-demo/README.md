@@ -28,17 +28,17 @@ alphaevolve-demo/
 
 ---
 
-## Quantitative Before & After Comparison (`128×128`, 1,024 Steps, 4 MPI Ranks)
+## Quantitative Before & After Comparison (`128x128`, 1,024 Steps, 4 MPI Ranks)
 
 | Benchmark / Metric | 64-Bit Baseline (`src_ref/`) | Initial Seed (`src_seed/`) | Prev AE Best (`src_prev_best/`) | Option-B Warm-Start Seed (`src_evolved/`) | **Live AlphaEvolve GA Best (`src_best/`)** |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **AlphaEvolve Trajectory Score** | `16.0000` (ceiling) | `4.6268` | `11.0896` | `15.637352` | **`15.637350`** (Target $\ge 14.0$) |
-| **Trajectory MSE** | `0.0` | `2.3614e-05` | `8.1367e-12` | `1.3049e-16` | **`1.3049e-16`** (**62,350× lower MSE**) |
-| **Trajectory RMSE** | `0.0` | `4.8594e-03` | `2.8525e-06` | `1.1423e-08` | **`1.1423e-08`** (**250× lower RMSE**, $\le 10^{-7}$) |
-| **Step 1,024 Final RMSE / $L_\infty$** | `0.0` / `0.0` | `5.96e-03` / `2.58e-02` | `5.54e-06` / `1.16e-04` | `1.10e-08` / `2.98e-08` | **`1.10e-08` / `2.98e-08`** |
-| **Discrete Velocity Divergence $\max\|\nabla\cdot\mathbf{u}\|$** | `7.752e-13` | `1.391e+00` | `1.981e-07` | `2.132e-14` | **`2.132e-14` (`128^2`) / `5.684e-14` (`256^2`)** |
-| **Area Drift ($t=0.2001$, Step 1,024)** | `0.2978%` | `0.3226%` | `0.3075%` | `0.2978%` | **`0.2978%`** ($\Delta = 0.0000\text{ pp}$) |
+| **AlphaEvolve Trajectory Score** | `16.0000` (ceiling) | `4.6268` | `11.0896` | `15.637352` | **`15.637350`** (Target >= 14.0) |
+| **Trajectory MSE** | `0.0` | `2.3614e-05` | `8.1367e-12` | `1.3049e-16` | **`1.3049e-16`** (**62,350x lower MSE**) |
+| **Trajectory RMSE** | `0.0` | `4.8594e-03` | `2.8525e-06` | `1.1423e-08` | **`1.1423e-08`** (**250x lower RMSE**, <= 1.0e-7) |
+| **Step 1,024 Final RMSE / Linf** | `0.0` / `0.0` | `5.96e-03` / `2.58e-02` | `5.54e-06` / `1.16e-04` | `1.10e-08` / `2.98e-08` | **`1.10e-08` / `2.98e-08`** |
+| **Discrete Velocity Divergence max|div u|** | `7.752e-13` | `1.391e+00` | `1.981e-07` | `2.132e-14` | **`2.132e-14` (`128^2`) / `5.684e-14` (`256^2`)** |
+| **Area Drift (t=0.2001, Step 1,024)** | `0.2978%` | `0.3226%` | `0.3075%` | `0.2978%` | **`0.2978%`** (delta = 0.0000 pp) |
 | **Spurious Sign Flips** | `0` | `85` | `0` | `0` | **`0`** |
-| **Total `fp32_asm_ops` / `hw_weighted_cost`** | N/A | — | — | `1,796` / `3,672` | **`1,140` (-36.53%) / `2,306` (-37.20%)** |
+| **Total `fp32_asm_ops` / `hw_weighted_cost`** | N/A |  --  |  --  | `1,796` / `3,672` | **`1,140` (-36.53%) / `2,306` (-37.20%)** |
 | **4-Rank Wall Time (1,024 steps)** | `2.18 s` | `1.95 s` | `2.10 s` | `3.40 s` | **`2.34 s` (-31.18% faster)** |
 | **64-Bit Assembly Ops (`fp64_asm_ops`)** | N/A (FP64 ref) | `0` | `0` | `0` | **`0`** (`_Float16` tokens = 26) |
