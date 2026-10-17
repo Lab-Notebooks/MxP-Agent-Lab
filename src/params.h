@@ -14,6 +14,29 @@
 // WENO5 reaches i-3 .. i+3.  Fewer guard cells is a silent correctness bug.
 constexpr int NGUARD = 3;
 
+// Floating-point precision of the WENO5 advection kernel (src/advect.cpp).
+// Everything other than the kernel stays FP64.  Any mode except fp64 also
+// carries an FP64 shadow trajectory through the run, and the spatial norms of
+// the difference go to history.csv (see driver.h).
+//   fp64     reference kernel, no shadow
+//   lowprec  native reduced-precision kernel advectWenoLowPrec (float /
+//            _Float16), the code AlphaEvolve evolves
+//   fp32, tf32, bf16, fp16
+//            the FP64 kernel with every op truncated to that format by RAPTOR
+//            (MPFR emulation, ~25x slower; needs a RAPTOR build)
+enum class Precision { kFp64, kLowPrec, kFp32, kTf32, kBf16, kFp16 };
+
+inline const char* precisionName(Precision m) {
+    switch (m) {
+        case Precision::kLowPrec: return "lowprec";
+        case Precision::kFp32: return "fp32";
+        case Precision::kTf32: return "tf32";
+        case Precision::kBf16: return "bf16";
+        case Precision::kFp16: return "fp16";
+        default: return "fp64";
+    }
+}
+
 struct Params {
     // mesh
     int nx = 128;             // interior cells in x (global)
@@ -41,6 +64,9 @@ struct Params {
 
     // level set
     int ls_iterations = 2;    // mph_lsIt
+
+    // advection kernel precision
+    Precision precision = Precision::kFp64;
 
     // output
     std::string outdir = "out";
@@ -76,6 +102,15 @@ inline bool toInt(const std::string& v, int& out) {
     return true;
 }
 
+inline bool toPrecision(const std::string& v, Precision& out) {
+    const Precision all[] = {Precision::kFp64, Precision::kLowPrec, Precision::kFp32,
+                             Precision::kTf32, Precision::kBf16, Precision::kFp16};
+    for (Precision m : all) {
+        if (v == precisionName(m)) { out = m; return true; }
+    }
+    return false;
+}
+
 inline bool toDouble(const std::string& v, double& out) {
     std::istringstream is(v);
     double tmp = 0.0;
@@ -109,6 +144,7 @@ inline bool setParam(const std::string& key, const std::string& val, Params& p, 
     else if (key == "max_steps") ok = paramsdetail::toInt(val, p.max_steps);
     else if (key == "reverse_time") ok = paramsdetail::toBool(val, p.reverse_time);
     else if (key == "ls_iterations") ok = paramsdetail::toInt(val, p.ls_iterations);
+    else if (key == "precision") ok = paramsdetail::toPrecision(val, p.precision);
     else if (key == "outdir") p.outdir = val;
     else if (key == "plot_interval") ok = paramsdetail::toInt(val, p.plot_interval);
     else if (key == "hist_interval") ok = paramsdetail::toInt(val, p.hist_interval);

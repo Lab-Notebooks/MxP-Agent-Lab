@@ -7,9 +7,12 @@ Bubble mini-app (U8).
 Reads `out/history.csv` written by src/io.cpp, whose columns are fixed by the
 Spec ("Output and post-processing"):
 
-    step, time, dt, area, mass, phi_min, phi_max, max_divergence, sign_flips
+    step, time, dt, area, mass, phi_min, phi_max, max_divergence, sign_flips,
+    err_l2, err_linf, err_band_l2, area_ref
 
-and writes three PNGs into the same directory:
+(the last four compare a reduced-precision run against its FP64 shadow
+trajectory; histories written before they existed are still read) and writes
+into the same directory:
 
     history_conservation.png   area and mass versus time, plus their relative
                                drift against the t = 0 value (the quantity
@@ -18,6 +21,9 @@ and writes three PNGs into the same directory:
                                invariant 6, with the per-step dt and the
                                cumulative redistance sign-flip count
     history_extrema.png        phi_min / phi_max versus time
+    history_precision.png      (reduced-precision runs only) spatial RMS, Linf
+                               and interface-band RMS of phi - phi_fp64 versus
+                               time, and the area drift of both trajectories
 
 Standard library + numpy + matplotlib only; no pandas, no `vtk` package.
 """
@@ -43,7 +49,12 @@ COLUMNS = [
     "phi_max",
     "max_divergence",
     "sign_flips",
+    "err_l2",
+    "err_linf",
+    "err_band_l2",
+    "area_ref",
 ]
+LEGACY_COLUMNS = COLUMNS[:9]
 
 DIV_TOL = 1.0e-12  # invariant 6
 AREA_BAR = 0.05  # Spec, Correctness bar: test_conservation
@@ -58,7 +69,7 @@ def read_history(path):
         except StopIteration:
             raise ValueError("%s: file is empty" % path)
         header = [h.strip() for h in header]
-        if header != COLUMNS:
+        if header not in (COLUMNS, LEGACY_COLUMNS):
             raise ValueError(
                 "%s: unexpected header\n  got      %s\n  expected %s"
                 % (path, ",".join(header), ",".join(COLUMNS))
@@ -67,16 +78,21 @@ def read_history(path):
         for lineno, row in enumerate(reader, start=2):
             if not row:
                 continue
-            if len(row) != len(COLUMNS):
+            if len(row) != len(header):
                 raise ValueError(
                     "%s:%d: %d fields, expected %d"
-                    % (path, lineno, len(row), len(COLUMNS))
+                    % (path, lineno, len(row), len(header))
                 )
             rows.append([float(v) for v in row])
     if not rows:
         raise ValueError("%s: header only, no data rows" % path)
     data = np.array(rows, dtype=np.float64)
-    return {name: data[:, k] for k, name in enumerate(COLUMNS)}
+    return {name: data[:, k] for k, name in enumerate(header)}
+
+
+def has_precision(h):
+    """True if the history carries a nonzero error against an FP64 shadow."""
+    return "err_l2" in h and float(np.max(h["err_linf"])) > 0.0
 
 
 def plot_conservation(outdir, h, prefix):
@@ -179,6 +195,42 @@ def plot_extrema(outdir, h, prefix):
     return png
 
 
+def plot_precision(outdir, h, prefix):
+    t = h["time"]
+    fig, axes = plt.subplots(2, 1, figsize=(7.2, 7.0), sharex=True)
+
+    ax = axes[0]
+    for name, color, label in (
+        ("err_linf", "crimson", "$L_\\infty$"),
+        ("err_l2", "steelblue", "$L_2$ (RMS over the domain)"),
+        ("err_band_l2", "darkorange", "$L_2$ over $|\\phi_{64}| \\leq 5h$"),
+    ):
+        ax.semilogy(t, np.maximum(h[name], 1.0e-300), color=color, lw=1.6, label=label)
+    ax.set_ylabel("$\\|\\phi - \\phi_{64}\\|$")
+    ax.set_title("error vs FP64 shadow   (trajectory RMS %.3e, max $L_\\infty$ %.3e)"
+                 % (float(np.sqrt(np.mean(h["err_l2"] ** 2))), float(h["err_linf"].max())))
+    ax.grid(alpha=0.3, which="both")
+    ax.legend(loc="best", fontsize=9)
+
+    ax = axes[1]
+    a0 = h["area"][0]
+    if a0 != 0.0:
+        ax.plot(t, 100.0 * (h["area_ref"] - a0) / a0, color="0.2", lw=1.6, ls="--",
+                label="fp64 shadow")
+        ax.plot(t, 100.0 * (h["area"] - a0) / a0, color="crimson", lw=1.4,
+                label="reduced precision")
+    ax.set_xlabel("t")
+    ax.set_ylabel("area drift [%]")
+    ax.grid(alpha=0.3)
+    ax.legend(loc="best", fontsize=9)
+
+    fig.tight_layout()
+    png = os.path.join(outdir, prefix + "_precision.png")
+    fig.savefig(png, dpi=110)
+    plt.close(fig)
+    return png
+
+
 def main(argv):
     args = argv[1:]
     outdir = None
@@ -232,6 +284,11 @@ def main(argv):
         plot_divergence(outdir, h, prefix),
         plot_extrema(outdir, h, prefix),
     ]
+    if has_precision(h):
+        print("plot_history: error vs fp64: trajectory RMS %.6e, final RMS %.6e, max Linf %.6e"
+              % (float(np.sqrt(np.mean(h["err_l2"] ** 2))), float(h["err_l2"][-1]),
+                 float(h["err_linf"].max())))
+        pngs.append(plot_precision(outdir, h, prefix))
     for p in pngs:
         print("plot_history: wrote %s" % p)
     return 0

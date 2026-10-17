@@ -84,6 +84,37 @@ Diagnostics computeDiagnostics(const Grid& g, const std::vector<double>& dfun,
     return d;
 }
 
+void computeErrorNorms(const Grid& g, const std::vector<double>& dfun,
+                       const std::vector<double>& ref, Diagnostics& d) {
+    const double eps = heavisideWidth(g);
+    const double band = 5.0 * ((g.dx() > g.dy()) ? g.dx() : g.dy());
+
+    // sum e^2, band sum e^2, band cell count, area of ref
+    double lsum[4] = {0.0, 0.0, 0.0, 0.0};
+    double lmax = 0.0;
+    for (int j = 0; j < g.ny(); ++j) {
+        for (int i = 0; i < g.nx(); ++i) {
+            const int k = g.index(i, j);
+            const double e = dfun[k] - ref[k];
+            lsum[0] += e * e;
+            if (std::fabs(ref[k]) <= band) {
+                lsum[1] += e * e;
+                lsum[2] += 1.0;
+            }
+            lsum[3] += smoothedHeaviside(ref[k], eps);
+            if (std::fabs(e) > lmax) lmax = std::fabs(e);
+        }
+    }
+
+    double sum[4];
+    MPI_Allreduce(lsum, sum, 4, MPI_DOUBLE, MPI_SUM, g.comm());
+    MPI_Allreduce(&lmax, &d.err_linf, 1, MPI_DOUBLE, MPI_MAX, g.comm());
+    const double ncells = static_cast<double>(g.nxGlobal()) * g.nyGlobal();
+    d.err_l2 = std::sqrt(sum[0] / ncells);
+    d.err_band_l2 = (sum[2] > 0.0) ? std::sqrt(sum[1] / sum[2]) : 0.0;
+    d.area_ref = sum[3] * g.dx() * g.dy();
+}
+
 std::string vtiName(int step, int rank) {
     char buf[64];
     std::snprintf(buf, sizeof(buf), "dfun_%06d_%04d.vti", step, rank);
@@ -123,7 +154,8 @@ bool writeHistoryHeader(const Grid& g, const Params& p, std::string& err) {
         if (!f) {
             ok = 0;
         } else {
-            f << "step,time,dt,area,mass,phi_min,phi_max,max_divergence,sign_flips\n";
+            f << "step,time,dt,area,mass,phi_min,phi_max,max_divergence,sign_flips,"
+                 "err_l2,err_linf,err_band_l2,area_ref\n";
             f.flush();
             if (!f) ok = 0;
         }
@@ -160,7 +192,13 @@ bool appendHistory(const Grid& g, const Params& p, int step, double time, double
             writeDouble(os, d.phi_max);
             os << ',';
             writeDouble(os, d.max_divergence);
-            os << ',' << d.sign_flips << '\n';
+            os << ',' << d.sign_flips;
+            const double tail[4] = {d.err_l2, d.err_linf, d.err_band_l2, d.area_ref};
+            for (double x : tail) {
+                os << ',';
+                writeDouble(os, x);
+            }
+            os << '\n';
             f << os.str();
             f.flush();
             if (!f) ok = 0;
@@ -176,7 +214,11 @@ bool appendHistory(const Grid& g, const Params& p, int step, double time, double
 
 bool writeFields(const Grid& g, const Params& p, int step, double time,
                  const std::vector<double>& dfun, const std::vector<double>& u,
-                 const std::vector<double>& v, std::string& err) {
+                 const std::vector<double>& v, std::string& err,
+                 const std::vector<double>* ref) {
+    const int narrays = (ref != nullptr) ? 5 : 3;
+    const char* names[5] = {"dfun", "u", "v", "dfun_ref", "err"};
+
     // Piece extent in *global point* index space: cells i0 .. i0+nx-1 span
     // points i0 .. i0+nx.
     const int ext[4] = {g.i0(), g.i0() + g.nx(), g.j0(), g.j0() + g.ny()};
@@ -211,8 +253,7 @@ bool writeFields(const Grid& g, const Params& p, int step, double time,
                << ext[3] << " 0 0\">\n";
             os << "      <CellData Scalars=\"dfun\">\n";
 
-            const char* names[3] = {"dfun", "u", "v"};
-            for (int a = 0; a < 3; ++a) {
+            for (int a = 0; a < narrays; ++a) {
                 os << "        <DataArray type=\"Float64\" Name=\"" << names[a]
                    << "\" format=\"ascii\">\n";
                 for (int j = 0; j < g.ny(); ++j) {
@@ -224,8 +265,12 @@ bool writeFields(const Grid& g, const Params& p, int step, double time,
                         } else if (a == 1) {
                             // MAC -> cell centre: u(i,j) is the low x-face.
                             val = 0.5 * (u[g.index(i, j)] + u[g.index(i + 1, j)]);
-                        } else {
+                        } else if (a == 2) {
                             val = 0.5 * (v[g.index(i, j)] + v[g.index(i, j + 1)]);
+                        } else if (a == 3) {
+                            val = (*ref)[g.index(i, j)];
+                        } else {
+                            val = dfun[g.index(i, j)] - (*ref)[g.index(i, j)];
                         }
                         os << ' ';
                         writeDouble(os, val);
@@ -274,9 +319,9 @@ bool writeFields(const Grid& g, const Params& p, int step, double time,
             os << "</DataArray>\n";
             os << "    </FieldData>\n";
             os << "    <PCellData Scalars=\"dfun\">\n";
-            os << "      <PDataArray type=\"Float64\" Name=\"dfun\"/>\n";
-            os << "      <PDataArray type=\"Float64\" Name=\"u\"/>\n";
-            os << "      <PDataArray type=\"Float64\" Name=\"v\"/>\n";
+            for (int a = 0; a < narrays; ++a) {
+                os << "      <PDataArray type=\"Float64\" Name=\"" << names[a] << "\"/>\n";
+            }
             os << "    </PCellData>\n";
             for (int r = 0; r < g.nprocs(); ++r) {
                 const int* e = &allExt[static_cast<std::size_t>(4 * r)];

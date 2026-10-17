@@ -16,6 +16,7 @@
 #include <string>
 #include <vector>
 
+#include "advect.h"
 #include "driver.h"
 #include "grid.h"
 #include "init.h"
@@ -65,6 +66,11 @@ int main(int argc, char** argv) {
         if (!parseParamAssignment(overrides[k], p, err)) abortWith(err, rank);
     }
     if (!validateParams(p, err)) abortWith(err, rank);
+    if (!precisionAvailable(p.precision)) {
+        abortWith(std::string("precision = ") + precisionName(p.precision) +
+                      " needs RAPTOR: rebuild with `make RAPTOR=1`",
+                  rank);
+    }
 
     {  // Grid owns an MPI communicator: scope it so it is freed before finalize.
         Grid grid;
@@ -87,6 +93,9 @@ int main(int argc, char** argv) {
             std::printf("bubble: tmax %g  cfl %g  fixed_dt %g  max_steps %d  reverse_time %s\n",
                         p.tmax, p.cfl, p.fixed_dt, p.max_steps, p.reverse_time ? "true" : "false");
             std::printf("bubble: ls_iterations  : %d\n", p.ls_iterations);
+            std::printf("bubble: precision      : %s%s\n", precisionName(p.precision),
+                        p.precision == Precision::kFp64 ? ""
+                                                        : "  (advection; FP64 shadow trajectory)");
             std::printf("bubble: outdir         : %s  (plot every %d, history every %d)\n",
                         p.outdir.c_str(), p.plot_interval, p.hist_interval);
             std::fflush(stdout);
@@ -157,6 +166,18 @@ int main(int argc, char** argv) {
             std::printf("bubble: sign flips     : %ld (total over the run)\n", s.sign_flips_total);
             std::printf("bubble: |dfun - dfun(t=0)| at t_end : %.6e%s\n", revErr,
                         p.reverse_time ? "   (reversal-mode error)" : "   (deformed, not reversed)");
+            if (p.precision != Precision::kFp64) {
+                std::printf("bubble: area (fp64)    : drift %.4f%%  (delta %+.4f pp)\n",
+                            100.0 * s.area_drift_ref, 100.0 * (s.area_drift - s.area_drift_ref));
+                std::printf("bubble: error vs fp64  : traj RMS %.6e  final RMS %.6e  max Linf %.6e\n",
+                            s.err_l2_traj, s.err_l2_final, s.err_linf_max);
+                std::printf("bubble: advect time    : %s %.3f s  fp64 %.3f s  speedup %.3fx\n",
+                            precisionName(p.precision), s.advect_seconds, s.advect_seconds_ref,
+                            s.advect_seconds > 0.0 ? s.advect_seconds_ref / s.advect_seconds
+                                                   : 0.0);
+            } else {
+                std::printf("bubble: advect time    : fp64 %.3f s\n", s.advect_seconds);
+            }
             std::printf("bubble: output         : %d plot(s) + %d history row(s) in %s/\n",
                         s.plots_written, s.history_rows, p.outdir.c_str());
             std::printf("bubble: wall time      : %.2f s on %d rank(s)\n", wall, nprocs);

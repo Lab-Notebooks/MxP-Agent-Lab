@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "grid.h"
+#include "params.h"
 
 // WENO5 reconstruction of phi at one face from the five-point stencil
 // s1..s5, with `positive` selecting the upwind branch on the sign of the face
@@ -39,5 +40,27 @@ double wenoFaceValue(double s1, double s2, double s3, double s4, double s5, bool
 // (and the new cells zeroed) if it does not already match the grid.
 void advectWeno(const Grid& g, const std::vector<double>& phi, const std::vector<double>& u,
                 const std::vector<double>& v, std::vector<double>& rhs);
+
+// ---- reduced precision -----------------------------------------------------
+//
+// The AlphaEvolve EVOLVE-BLOCK in advect.cpp: the same reconstruction and
+// flux difference with float stencil values, face velocities and rhs.  Must
+// not use any 64-bit floating point (the advect-mxp evaluator audits the
+// source and the disassembly).  `dxi`, `dyi` are 1/dx, 1/dy.  Accumulates
+// into `rhs` like advectWeno().
+float wenoFaceValueLowPrec(float s1, float s2, float s3, float s4, float s5, bool positive);
+void advectWenoLowPrec(const Grid& g, const std::vector<float>& phi, const std::vector<float>& u,
+                       const std::vector<float>& v, float dxi, float dyi, std::vector<float>& rhs);
+
+// True if this build can run `m`: the RAPTOR-emulated formats need advect.cpp
+// compiled with the RAPTOR pass (BUBBLE_RAPTOR, see the Makefile).
+bool precisionAvailable(Precision m);
+
+// advectWeno() with the kernel run at precision `m` (see Precision in
+// params.h).  The fp64 fields are converted at the boundary; the conversion
+// is part of the cost of the reduced-precision kernel.
+void advectWenoAt(const Grid& g, Precision m, const std::vector<double>& phi,
+                  const std::vector<double>& u, const std::vector<double>& v,
+                  std::vector<double>& rhs);
 
 #endif  // BUBBLE_ADVECT_H
