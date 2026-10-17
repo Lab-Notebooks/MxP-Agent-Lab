@@ -1,0 +1,4 @@
+- docker build -t bubble-mxp .
+- alias bmx='docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work bubble-mxp'
+- bmx make check
+- Start Claude-Code or Antigravity and start working through dev/workflows one a time.

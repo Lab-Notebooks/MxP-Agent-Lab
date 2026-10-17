@@ -1,0 +1,46 @@
+# Verification spec for a candidate src/: owned by the scientist.
+# Copy it (e.g. verification.<candidate>.yaml), fill in every <...>, then run in the container:
+#
+#   bmx python3 dev/workflows/verify/run_verification.py verification.<candidate>.yaml
+#
+# Everything is written under `dest`; nothing goes into src/.
+
+candidate: "<experiment name / commit of the applied candidate>"
+dest: out_verify_<candidate>
+
+# make check first (each test on the rank counts its source declares, // ranks: 1 2 4)
+tests: true
+
+# Simulation runs.  Run stdout goes to dest/<name>/run.log, verify.py output to dest/<name>/verify/.
+runs:
+  - name: eval                     # the candidate at the eval configuration
+    params: params/<name>_eval.ini
+    overrides: [precision=lowprec] # the stage-2 mode
+    ranks: 4
+    cells: []                      # extra (i,j) schematics besides the max-error cell, e.g. [[64, 90]]
+  - name: eval_np1                 # rank-count study: same run on one rank
+    params: params/<name>_eval.ini
+    overrides: [precision=lowprec]
+    ranks: 1
+  # more studies, e.g. a finer grid, another geometry, reversal, a RAPTOR format:
+  # - name: fine
+  #   params: params/<name>_eval.ini
+  #   overrides: [precision=lowprec, nx=256, ny=256]
+  #   ranks: 4
+
+# Run-vs-run comparisons (verify.py RUN --ref REF): the state of RUN against the state of REF.
+compare:
+  - name: np1_vs_np4               # ~0 unless the kernel depends on the decomposition
+    run: eval_np1
+    ref: eval
+    criteria:
+      trajectory_rms_max: 1.0e-12
+
+# Acceptance for every run (verify.py --criteria): <metric>_max / <metric>_min
+# against the top-level numbers in metrics.json.  A missing metric fails.
+criteria:
+  trajectory_rms_max: <tol>                 # RMS over snapshots of ||state - state_fp64||_2
+  max_linf_max: <tol>
+  history_cross_check_max_rel_max: 1.0e-6   # field-recomputed vs history.csv norms
+  stencil_fail_max: 0                       # machine-checked proofs (verify.py section 2)
+  # stencil_info_max: 0                     # require the proofs to parse the evolved kernel

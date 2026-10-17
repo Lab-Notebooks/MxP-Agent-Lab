@@ -6,8 +6,10 @@ out/
 out_ref/
 out_tf32/
 out_profile/
-out_compare/
+out_eval/
 *.o
 *.d
 *.bin
 __pycache__/
+dev/workflows/**/results/
+out_*/

@@ -10,6 +10,8 @@ their extents in global index space.  The pieces are reassembled into a single
 global array -- this is the check that the `.pvti` set really is one field --
 and for every frame the `phi = 0` contour is drawn over the velocity field.
 Writes `fields_<step>.png` per frame plus the animated GIF `fields.gif`.
+For a reduced-precision run the FP64 shadow contour (`dfun_ref`) is drawn
+dashed on top, and the title carries max |dfun - dfun_ref|.
 
 Standard library + numpy + matplotlib only; no `vtk` package (Spec, "Output and
 post-processing").
@@ -113,12 +115,18 @@ def frame_png(outdir, step, origin, spacing, time, fields, dpi=110):
             color="0.35", scale=20.0, width=0.0025,
         )
     ax.contour(X, Y, dfun, levels=[0.0], colors="crimson", linewidths=1.8)
+    title = "step %d   t = %.4f   phi = 0 contour" % (step, time)
+    if "dfun_ref" in fields:
+        ax.contour(X, Y, fields["dfun_ref"], levels=[0.0], colors="k", linewidths=1.0,
+                   linestyles="--")
+        title += "\nred: reduced precision, dashed: fp64   max|err| %.2e" % float(
+            np.abs(fields["err"]).max())
     ax.set_aspect("equal")
     ax.set_xlim(origin[0], x[-1] + 0.5 * spacing[0])
     ax.set_ylim(origin[1], y[-1] + 0.5 * spacing[1])
     ax.set_xlabel("x")
     ax.set_ylabel("y")
-    ax.set_title("step %d   t = %.4f   phi = 0 contour" % (step, time))
+    ax.set_title(title, fontsize=10)
     fig.tight_layout()
     png = os.path.join(outdir, "fields_%06d.png" % step)
     fig.savefig(png, dpi=dpi)

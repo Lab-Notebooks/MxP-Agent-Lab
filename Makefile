@@ -7,7 +7,9 @@
 # No -ffast-math (breaks the 1e-12 reproducibility tolerance, Spec "Silent traps").
 
 CXX      := mpicxx
-CXXFLAGS := -std=c++17 -O2 -g -Wall -Wextra -Werror -MMD -MP
+# OMPI_SKIP_MPICXX: only the C API is used; the deprecated C++ bindings
+# trip -Werror (cast-function-type) with newer compilers.
+CXXFLAGS := -std=c++17 -O2 -g -Wall -Wextra -Werror -MMD -MP -DOMPI_SKIP_MPICXX
 LDFLAGS  :=
 LDLIBS   := -lm
 
