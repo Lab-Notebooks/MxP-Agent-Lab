@@ -1,0 +1,211 @@
+diff --git a/Makefile b/Makefile
+index c860bbe..322f0ad 100644
+--- a/Makefile
++++ b/Makefile
+@@ -2,6 +2,23 @@ CXX      := mpicxx
+ CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -Werror
+ LDLIBS   := -lm
+ 
++# --- RAPTOR (src/kernel.cpp only) -------------------------------------------
++# Used whenever the plugin exists; `make RAPTOR=0` builds without it (fp64 only).
++RAPTOR_INSTALL_DIR ?= $(HOME)/raptor-install
++LLVM_VER           ?= 20
++RAPTOR_PLUGIN      := $(RAPTOR_INSTALL_DIR)/lib/LLVMRaptor-$(LLVM_VER).so
++RAPTOR             ?= $(if $(wildcard $(RAPTOR_PLUGIN)),1,0)
++
++ifeq ($(RAPTOR),1)
++KERNEL_CXX      := clang++-$(LLVM_VER)
++KERNEL_CXXFLAGS := $(CXXFLAGS) -DBUBBLE_RAPTOR=1 -I$(RAPTOR_INSTALL_DIR)/include \
++                   $(shell $(CXX) -showme:compile) -fpass-plugin=$(RAPTOR_PLUGIN)
++LDLIBS          += -L$(RAPTOR_INSTALL_DIR)/lib -lRaptor-RT-$(LLVM_VER) -lmpfr -lstdc++
++else
++KERNEL_CXX      := $(CXX)
++KERNEL_CXXFLAGS := $(CXXFLAGS)
++endif
++
+ SRCS := $(wildcard src/*.cpp)
+ OBJS := $(patsubst src/%.cpp,build/%.o,$(SRCS))
+ 
+@@ -11,5 +28,8 @@ app: $(OBJS)
+ build/%.o: src/%.cpp | build
+ 	$(CXX) $(CXXFLAGS) -Isrc -c -o $@ $<
+ 
++build/kernel.o: src/kernel.cpp | build
++	$(KERNEL_CXX) $(KERNEL_CXXFLAGS) -Isrc -c -o $@ $<
++
+ build:
+ 	mkdir -p build
+diff --git a/src/driver.cpp b/src/driver.cpp
+index f87fcda..f808294 100644
+--- a/src/driver.cpp
++++ b/src/driver.cpp
+@@ -1,5 +1,7 @@
+-// driver.cpp -- time loop.
++// driver.cpp -- time loop.  At precision != fp64 an FP64 shadow state `uRef`
++// is advanced with the same dt; the RMS of u - uRef goes to the history.
+ #include <algorithm>
++#include <cmath>
+ #include <vector>
+ 
+ #include "kernel.h"
+@@ -7,7 +9,23 @@
+ 
+ void step(const Params& p, std::vector<double>& u, std::vector<double>& rhs, double dt) {
+     std::fill(rhs.begin(), rhs.end(), 0.0);
+-    applyKernel(u, rhs);
++    applyKernelAt(p.precision, u, rhs);
+     for (std::size_t i = 0; i < u.size(); ++i) u[i] += dt * rhs[i];
+-    (void)p;
++}
++
++// RMS of u - uRef (the err_l2 history column).
++double errL2(const std::vector<double>& u, const std::vector<double>& uRef) {
++    double s = 0.0;
++    for (std::size_t i = 0; i < u.size(); ++i) s += (u[i] - uRef[i]) * (u[i] - uRef[i]);
++    return std::sqrt(s / static_cast<double>(u.size()));
++}
++
++void stepWithShadow(const Params& p, std::vector<double>& u, std::vector<double>& uRef,
++                    std::vector<double>& rhs, double dt) {
++    step(p, u, rhs, dt);
++    if (p.precision != Precision::kFp64) {
++        Params pRef = p;
++        pRef.precision = Precision::kFp64;
++        step(pRef, uRef, rhs, dt);
++    }
+ }
+diff --git a/src/kernel.cpp b/src/kernel.cpp
+index 94b5f57..bc86185 100644
+--- a/src/kernel.cpp
++++ b/src/kernel.cpp
+@@ -1,14 +1,63 @@
+-// kernel.cpp -- the hot kernel, FP64.
++// kernel.cpp -- the hot kernel, FP64, plus RAPTOR-truncated clones of it.
+ #include "kernel.h"
+ 
++#ifdef BUBBLE_RAPTOR
++#include "raptor/raptor.h"
++#endif
++
+ double kernelPoint(double a, double b, double c) {
+     const double d1 = b - a;
+     const double d2 = c - b;
+     return (d1 * d1 + d2 * d2) / (1.0e-12 + d1 * d1 + d2 * d2) * (c - a) * 0.5;
+ }
+ 
+-void applyKernel(const std::vector<double>& in, std::vector<double>& out) {
++namespace {
++
++template <typename Point>
++void applyKernelWith(const std::vector<double>& in, std::vector<double>& out, Point point) {
+     for (std::size_t i = 1; i + 1 < in.size(); ++i) {
+-        out[i] += kernelPoint(in[i - 1], in[i], in[i + 1]);
++        out[i] += point(in[i - 1], in[i], in[i + 1]);
++    }
++}
++
++#ifdef BUBBLE_RAPTOR
++using PointFn = double (*)(double, double, double);
++
++// RAPTOR clones kernelPoint() with every FP op rounded to (exponent, mantissa)
++// bits.  The format is a compile-time constant: one call site per format.
++PointFn truncated(Precision m) {
++    switch (m) {
++        case Precision::kFp32: { static PointFn f = __raptor_truncate_op_func(kernelPoint, 64, 1, 8, 23); return f; }
++        case Precision::kTf32: { static PointFn f = __raptor_truncate_op_func(kernelPoint, 64, 1, 8, 10); return f; }
++        case Precision::kBf16: { static PointFn f = __raptor_truncate_op_func(kernelPoint, 64, 1, 8, 7); return f; }
++        case Precision::kFp16: { static PointFn f = __raptor_truncate_op_func(kernelPoint, 64, 1, 5, 10); return f; }
++        default: return kernelPoint;
++    }
++}
++#endif
++
++}  // namespace
++
++void applyKernel(const std::vector<double>& in, std::vector<double>& out) {
++    applyKernelWith(in, out, kernelPoint);
++}
++
++bool precisionAvailable(Precision m) {
++#ifdef BUBBLE_RAPTOR
++    (void)m;
++    return true;
++#else
++    return m == Precision::kFp64;
++#endif
++}
++
++void applyKernelAt(Precision m, const std::vector<double>& in, std::vector<double>& out) {
++#ifdef BUBBLE_RAPTOR
++    if (m != Precision::kFp64) {
++        applyKernelWith(in, out, truncated(m));
++        return;
+     }
++#endif
++    (void)m;
++    applyKernel(in, out);
+ }
+diff --git a/src/kernel.h b/src/kernel.h
+index 44c0dd9..c8964e6 100644
+--- a/src/kernel.h
++++ b/src/kernel.h
+@@ -2,5 +2,13 @@
+ #pragma once
+ #include <vector>
+ 
++#include "params.h"
++
+ double kernelPoint(double a, double b, double c);
+ void applyKernel(const std::vector<double>& in, std::vector<double>& out);
++
++// True if this build can run `m` (RAPTOR modes need -DBUBBLE_RAPTOR, see Makefile).
++bool precisionAvailable(Precision m);
++
++// applyKernel() at precision `m`.
++void applyKernelAt(Precision m, const std::vector<double>& in, std::vector<double>& out);
+diff --git a/src/params.h b/src/params.h
+index cac72f5..0102d47 100644
+--- a/src/params.h
++++ b/src/params.h
+@@ -2,15 +2,41 @@
+ #pragma once
+ #include <string>
+ 
++// Precision of the hot kernel; everything else stays FP64.  Any mode but fp64
++// also advances an FP64 shadow copy of the state, so one run is the comparison.
++//   fp64                    reference kernel, no shadow
++//   fp32, tf32, bf16, fp16  the FP64 kernel with every op truncated by RAPTOR
++enum class Precision { kFp64, kFp32, kTf32, kBf16, kFp16 };
++
++inline const char* precisionName(Precision m) {
++    switch (m) {
++        case Precision::kFp32: return "fp32";
++        case Precision::kTf32: return "tf32";
++        case Precision::kBf16: return "bf16";
++        case Precision::kFp16: return "fp16";
++        default: return "fp64";
++    }
++}
++
+ struct Params {
+     int nx = 128;
+     double tmax = 1.0;
++    Precision precision = Precision::kFp64;
+     std::string outdir = "out";
+ };
+ 
++inline bool toPrecision(const std::string& v, Precision& out) {
++    for (Precision m : {Precision::kFp64, Precision::kFp32, Precision::kTf32, Precision::kBf16,
++                        Precision::kFp16}) {
++        if (v == precisionName(m)) { out = m; return true; }
++    }
++    return false;
++}
++
+ inline bool setParam(const std::string& key, const std::string& val, Params& p) {
+     if (key == "nx") p.nx = std::stoi(val);
+     else if (key == "tmax") p.tmax = std::stod(val);
++    else if (key == "precision") return toPrecision(val, p.precision);
+     else if (key == "outdir") p.outdir = val;
+     else return false;
+     return true;

@@ -30,15 +30,12 @@ double computeTimestep(const Params& p, const Grid& g, double umax, double vmax,
 
 long advanceOneStep(const Grid& g, const Params& p, std::vector<double>& phi,
                     const std::vector<double>& u, const std::vector<double>& v, double dt,
-                    std::vector<double>& rhs, std::vector<double>& phiOrig,
-                    double* advectSeconds) {
+                    std::vector<double>& rhs, std::vector<double>& phiOrig) {
     if (rhs.size() != phi.size()) rhs.assign(phi.size(), 0.0);
 
     // WENO5 accumulates into rhs (the Fortran does), so zero it first.
     std::fill(rhs.begin(), rhs.end(), 0.0);
-    const double t0 = MPI_Wtime();
-    advectWenoAt(g, p.precision, phi, u, v, rhs);
-    if (advectSeconds != nullptr) *advectSeconds += MPI_Wtime() - t0;
+    advectWeno(g, phi, u, v, rhs);
 
     // Forward Euler (Stencils_integrateEuler, no source term).
     for (int j = 0; j < g.ny(); ++j) {
@@ -59,15 +56,6 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
     std::vector<double> v = g.allocate();
     std::vector<double> rhs = g.allocate();
     std::vector<double> phiOrig = g.allocate();
-
-    // FP64 shadow trajectory of a reduced-precision run.
-    const bool shadow = (p.precision != Precision::kFp64);
-    Params pRef = p;
-    pRef.precision = Precision::kFp64;
-    std::vector<double> phiRef;
-    if (shadow) phiRef = dfun;
-    const std::vector<double>* ref = shadow ? &phiRef : nullptr;
-    double errSqSum = 0.0;
 
     // Unscaled maximum face speeds: the velocity field is steady, and the
     // optional reverse_time factor cos(pi t / tmax) only shrinks it, so these
@@ -90,10 +78,9 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
     // Initial state: velocity at t = 0 (scaled, if reverse_time), output.
     computeFaceVelocity(g, p, time, u, v);
     Diagnostics diag = computeDiagnostics(g, dfun, u, v, 0L);
-    diag.area_ref = diag.area;
     summary.area_initial = diag.area;
     summary.max_divergence = diag.max_divergence;
-    if (!writeFields(g, p, step, time, dfun, u, v, err, ref)) return false;
+    if (!writeFields(g, p, step, time, dfun, u, v, err)) return false;
     ++summary.plots_written;
     if (!appendHistory(g, p, step, time, 0.0, diag, err)) return false;
     ++summary.history_rows;
@@ -108,12 +95,8 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
         // Velocity is recomputed every step, mirroring the reference driver.
         computeFaceVelocity(g, p, time, u, v);
 
-        const long flips =
-            advanceOneStep(g, p, dfun, u, v, dt, rhs, phiOrig, &summary.advect_seconds);
+        const long flips = advanceOneStep(g, p, dfun, u, v, dt, rhs, phiOrig);
         summary.sign_flips_total += flips;
-        if (shadow) {
-            advanceOneStep(g, pRef, phiRef, u, v, dt, rhs, phiOrig, &summary.advect_seconds_ref);
-        }
 
         time += dt;
         ++step;
@@ -126,28 +109,21 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
 
         if (wantHist || wantPlot) {
             diag = computeDiagnostics(g, dfun, u, v, flips);
-            if (shadow) {
-                computeErrorNorms(g, dfun, phiRef, diag);
-            } else {
-                diag.area_ref = diag.area;
-            }
             if (diag.max_divergence > summary.max_divergence) {
                 summary.max_divergence = diag.max_divergence;
             }
         }
         if (wantHist) {
-            errSqSum += diag.err_l2 * diag.err_l2;
-            if (diag.err_linf > summary.err_linf_max) summary.err_linf_max = diag.err_linf;
             if (!appendHistory(g, p, step, time, dt, diag, err)) return false;
             ++summary.history_rows;
         }
         if (wantPlot) {
-            if (!writeFields(g, p, step, time, dfun, u, v, err, ref)) return false;
+            if (!writeFields(g, p, step, time, dfun, u, v, err)) return false;
             ++summary.plots_written;
         }
         if (p.verbosity > 1 && g.rank() == 0 && (step % 100 == 0 || lastStep)) {
-            std::printf("bubble: step %6d  t %.6f  dt %.3e  area %.9f  flips %ld  err_l2 %.3e\n",
-                        step, time, dt, diag.area, flips, diag.err_l2);
+            std::printf("bubble: step %6d  t %.6f  dt %.3e  area %.9f  flips %ld\n", step, time,
+                        dt, diag.area, flips);
             std::fflush(stdout);
         }
     }
@@ -158,12 +134,5 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
     summary.area_drift = (summary.area_initial > 0.0)
                              ? std::fabs(diag.area - summary.area_initial) / summary.area_initial
                              : 0.0;
-    summary.err_l2_final = diag.err_l2;
-    summary.err_l2_traj =
-        (summary.history_rows > 0) ? std::sqrt(errSqSum / summary.history_rows) : 0.0;
-    summary.area_drift_ref = (summary.area_initial > 0.0)
-                                 ? std::fabs(diag.area_ref - summary.area_initial) /
-                                       summary.area_initial
-                                 : 0.0;
     return true;
 }

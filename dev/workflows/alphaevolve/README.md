@@ -1,42 +1,40 @@
-# AlphaEvolve: generic optimization run
+# Stage 3, alphaevolve: write the evaluator, then run AlphaEvolve jobs
 
-Runs an AlphaEvolve optimization for **any** experiment in this repo. It knows
-nothing about a particular problem: the problem lives in an experiment directory,
-and the code to evolve is whatever already sits between `// EVOLVE-BLOCK-START`
-and `// EVOLVE-BLOCK-END` in that experiment's seed files. Experiments, and the
-EVOLVE-BLOCK markers in the source, are produced by the evaluator workflow
-(`dev/workflows/evaluator/`). This workflow is triggered independently of the
-analysis workflow (`dev/workflows/verify/`).
+Turns the scientist's objective into an experiment, then runs AlphaEvolve
+against it. Steps are in [`plan.md`](plan.md).
 
 ```text
-experiment dir (from dev/workflows/evaluator/experiments/<name>/)
-├── experiment.yaml   title, problem_description, primary_metric, seed_files,
-│                     evaluator: {script, method, postprocess?}
-├── evaluator.py      method() -> {"scores": [{metric, score}], "insights": [{label, text}]}
-└── results/          written here: baseline.json, bundle.tar.gz, best/ (gitignored)
+dev/workflows/alphaevolve/
+├── plan.md                    the steps
+├── experiment.template.yaml   annotated experiment.yaml (prompt, rules, metric, seed files, evaluator)
+├── evaluator.template.py      evaluator skeleton: build -> audit -> run -> score, postprocess
+└── experiments/<name>/        written in this stage, one per objective
+    ├── experiment.yaml
+    ├── evaluator.py           method() -> {"scores": [{metric, score}], "insights": [{label, text}]}
+    │                          postprocess(top_programs) -> results/best/<seed path>
+    └── results/               baseline.json, bundle.tar.gz, best/   (gitignored)
 ```
 
-## Steps
+## The evaluator contract
 
-```sh
-X=dev/workflows/evaluator/experiments/advect-mxp
-R=dev/workflows/alphaevolve/run.py
+- **Inputs:** none. It runs from the repo root (or `BUBBLE_ROOT`) on the tree
+  the platform materialised for one candidate.
+- **Output:** a score for every metric, or None for all of them when the
+  candidate failed to build, broke a rule, timed out, crashed, or produced
+  NaN/Inf. Each insight is a short `{label, text}` that tells the model why.
+- **Audit:** a token scan of each EVOLVE-BLOCK, plus a disassembly scan of every
+  function whose name carries the audit tag (`LowPrec` by default) in the
+  object file, looking for 64-bit FP instructions.
+  - Known gap: an FP helper without the tag that the compiler doesn't inline
+    isn't disassembled. The prompt must require the naming rule.
+- **Determinism:** the same tree gives the same non-timing scores. Timing
+  scores are measured within one run (low precision vs FP64 shadow), so the
+  machine's speed cancels out.
+- **Standalone:** `python3 evaluator.py` prints the JSON. Use this for the
+  baseline and the red-team.
 
-python3 $R check    $X   # seed files have balanced EVOLVE-BLOCKs, evaluator + methods exist
-python3 $R baseline $X   # score the current tree -> $X/results/baseline.json
-python3 $R bundle   $X   # working tree (minus submodules) -> $X/results/bundle.tar.gz
-ALPHAEVOLVE_SUBMIT_CMD='<your platform CLI> ... {experiment} {bundle}' \
-python3 $R submit   $X   # bundle + launch on the AlphaEvolve platform
-python3 $R apply    $X   # copy $X/results/best/<seed files> (from postprocess) into the repo
-```
-
-- `submit` has no default command: the launch CLI depends on your AlphaEvolve
-  deployment. `{experiment}`, `{bundle}` and `{root}` are substituted.
-- `apply` shows a diff stat and asks before overwriting. Afterwards, run the
-  analysis workflow (`dev/workflows/verify/`) and `make check` on the result.
-
-## Current experiments
+## Experiments
 
 | name | seed files | primary metric | baseline |
 | --- | --- | --- | --- |
-| `advect-mxp` | `src/advect.cpp` | `combined_score` (accuracy vs FP64 + speedup, gated) | 18.02 (accuracy 18.0, speedup 1.0x) |
+| *(none yet: add one row per experiment)* | | | |

@@ -3,6 +3,7 @@
 
     python3 dev/workflows/verify/verify.py OUTDIR [--ref REFDIR] [--src SRCDIR]
                                                   [--cell I J] [--dest DIR]
+                                                  [--criteria verification.yaml]
 
 OUTDIR is a run output directory (history.csv + dfun_*.pvti/.vti).  The error
 is phi - phi_fp64, taken from the run's own FP64 shadow (`dfun_ref`, written for
@@ -11,7 +12,7 @@ precision != fp64) or, with --ref, from a second run's `dfun` at matching steps.
 Writes into DEST (default OUTDIR/verify/):
 
   report.md              everything below, in prose + tables
-  metrics.json           machine-readable numbers (used by the review loop)
+  metrics.json           machine-readable numbers
   norms_vs_time.png      L1, L2 (RMS), Linf of the error per snapshot
   error_map.png          signed error at the final frame, with both phi = 0 contours
   stencil_schematic.png  cell (i,j): cell-centre vs face-centre variables and the
@@ -34,6 +35,10 @@ Sections of the analysis:
      quadratics (3rd order), the d-weighted combination is exact for quartics
      (5th order).
   3. Schematic of point (i,j) (default: the cell of max final error).
+  4. Acceptance (with --criteria).  Each `<metric>_max` / `<metric>_min` entry
+     of the file's `criteria:` mapping is checked against the top-level number
+     of that name in metrics.json (e.g. trajectory_rms_max, stencil_fail_max);
+     a metric that is missing counts as a failure.
 
 Standard library + numpy + matplotlib only.
 """
@@ -620,6 +625,54 @@ def write_report(dest, outdir, label, rows, fit, xcheck, st, cell, local, pngs):
         f.write("\n".join(L) + "\n")
 
 
+# ---------------------------------------------------------------------------
+# 4. acceptance
+# ---------------------------------------------------------------------------
+
+def load_criteria(path):
+    with open(path) as f:
+        text = f.read()
+    if path.endswith(".json"):
+        spec = json.loads(text)
+    else:
+        import yaml  # PyYAML, in the project image
+        spec = yaml.safe_load(text)
+    return (spec or {}).get("criteria", {})
+
+
+def check_criteria(criteria, metrics):
+    out = []
+    for name, limit in criteria.items():
+        if name.endswith("_max"):
+            metric, ok = name[:-4], (lambda v, L: v <= L)
+        elif name.endswith("_min"):
+            metric, ok = name[:-4], (lambda v, L: v >= L)
+        else:
+            out.append({"criterion": name, "metric": name, "limit": limit, "value": None,
+                        "status": "FAIL", "why": "criterion must end in _max or _min"})
+            continue
+        value = metrics.get(metric)
+        if not isinstance(value, (int, float)):
+            status, why = "FAIL", "metric not available for this run"
+        else:
+            status, why = ("PASS", "") if ok(value, float(limit)) else ("FAIL", "outside limit")
+        out.append({"criterion": name, "metric": metric, "limit": limit, "value": value,
+                    "status": status, "why": why})
+    return out
+
+
+def append_acceptance(dest, path, results):
+    L = ["## 4. Acceptance", "", "Criteria from `%s`." % path, "",
+         "| criterion | value | limit | status |", "|:---|---:|---:|:---|"]
+    for c in results:
+        v = c["value"]
+        L.append("| `%s` | %s | %s | %s%s |" % (
+            c["criterion"], ("%.3e" % v) if isinstance(v, float) else v, c["limit"], c["status"],
+            (" (%s)" % c["why"]) if c["why"] and c["status"] != "PASS" else ""))
+    with open(os.path.join(dest, "report.md"), "a") as f:
+        f.write("\n".join(L) + "\n")
+
+
 def main(argv):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("outdir")
@@ -627,6 +680,7 @@ def main(argv):
     ap.add_argument("--src", default="src")
     ap.add_argument("--cell", nargs=2, type=int, metavar=("I", "J"))
     ap.add_argument("--dest")
+    ap.add_argument("--criteria", help="YAML/JSON file with a `criteria:` mapping (acceptance)")
     a = ap.parse_args(argv[1:])
 
     if not os.path.isdir(a.outdir):
@@ -671,13 +725,22 @@ def main(argv):
         "stencils": {"fp64": st["fp64"], "lowprec": st["lowprec"]},
         "cell": list(cell) if cell else None, "cell_values": local,
     }
+    for status in ("PASS", "INFO", "FAIL"):
+        metrics["stencil_" + status.lower()] = sum(1 for s, _ in st["findings"] if s == status)
     if rows:
         metrics["trajectory_rms"] = math.sqrt(sum(r["l2"] ** 2 for r in rows) / len(rows))
         metrics["max_linf"] = max(r["linf"] for r in rows)
+    if a.criteria:
+        metrics["acceptance"] = check_criteria(load_criteria(a.criteria), metrics)
+        append_acceptance(dest, a.criteria, metrics["acceptance"])
     with open(os.path.join(dest, "metrics.json"), "w") as f:
         json.dump(metrics, f, indent=2)
 
     fails = [t for s, t in st["findings"] if s == "FAIL"]
+    for c in metrics.get("acceptance", []):
+        print("verify: %s %s = %s (limit %s)" % (c["status"], c["metric"], c["value"], c["limit"]))
+        if c["status"] == "FAIL":
+            fails.append("acceptance: %s" % c["criterion"])
     print("verify: %d snapshot(s) analysed, %d stencil check(s), %d FAIL" % (
         len(rows), len(st["findings"]), len(fails)))
     for t in fails:

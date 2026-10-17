@@ -1,0 +1,13 @@
+.git
+**/__pycache__
+build/
+build_raptor/
+bubble
+bubble_raptor
+out/
+out_*/
+*.o
+*.d
+*.bin
+dev/tools/RAPTOR/build/
+dev/workflows/**/results/

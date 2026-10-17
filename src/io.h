@@ -7,13 +7,7 @@
 //                                pieces with their extents in *global* index
 //                                space so the set reassembles to one field
 //   out/history.csv              step, time, dt, area, mass, phi_min, phi_max,
-//                                max_divergence, sign_flips, err_l2, err_linf,
-//                                err_band_l2, area_ref
-//
-// The err_* / area_ref columns compare against the FP64 shadow trajectory of a
-// reduced-precision run (Params::precision != fp64); in an fp64 run the errors
-// are 0 and area_ref = area.  The .vti pieces of such a run also carry the
-// shadow field (dfun_ref) and the pointwise error (err = dfun - dfun_ref).
+//                                max_divergence, sign_flips
 //
 // ASCII at 128^2 is cheap and keeps the Python reader dependency-free (Spec,
 // "Simplicity tradeoff").  All floating point is written with 17 significant
@@ -38,13 +32,6 @@ struct Diagnostics {
     double phi_max = 0.0;
     double max_divergence = 0.0;   // invariant 6
     long sign_flips = 0;           // redistance warning counter of the last step
-
-    // Spatial norms of dfun - dfun_ref (FP64 shadow trajectory), see
-    // computeErrorNorms().  Zero in an fp64 run.
-    double err_l2 = 0.0;           // RMS over the domain
-    double err_linf = 0.0;         // max abs
-    double err_band_l2 = 0.0;      // RMS over the interface band |dfun_ref| <= 5 max(dx, dy)
-    double area_ref = 0.0;         // area of dfun_ref (= area in an fp64 run)
 };
 
 // Smoothed Heaviside with half-width `eps` (Spec: 1.5 cells):
@@ -61,11 +48,6 @@ Diagnostics computeDiagnostics(const Grid& g, const std::vector<double>& dfun,
                                const std::vector<double>& u, const std::vector<double>& v,
                                long signFlips);
 
-// Fill the err_* and area_ref fields of `d` by comparing `dfun` with the FP64
-// shadow field `ref`.  Collective.
-void computeErrorNorms(const Grid& g, const std::vector<double>& dfun,
-                       const std::vector<double>& ref, Diagnostics& d);
-
 // Create `p.outdir` if it does not exist (rank 0 creates, all ranks wait).
 // Returns false with `err` filled if it cannot be created.
 bool ensureOutputDir(const Grid& g, const Params& p, std::string& err);
@@ -81,13 +63,10 @@ bool appendHistory(const Grid& g, const Params& p, int step, double time, double
 // Write this rank's out/dfun_<step>_<rank>.vti and, on rank 0, the master
 // out/dfun_<step>.pvti.  Cell data: dfun, and the face velocities averaged to
 // cell centres as u, v (so the plotter can draw the field without knowing the
-// MAC convention).  With a shadow field `ref`, also dfun_ref and
-// err = dfun - dfun_ref.  Collective: the piece extents are gathered for the
-// .pvti.
+// MAC convention).  Collective: the piece extents are gathered for the .pvti.
 bool writeFields(const Grid& g, const Params& p, int step, double time,
                  const std::vector<double>& dfun, const std::vector<double>& u,
-                 const std::vector<double>& v, std::string& err,
-                 const std::vector<double>* ref = nullptr);
+                 const std::vector<double>& v, std::string& err);
 
 // File names (relative to p.outdir), exposed so the tests and the tools agree
 // with the writer.
