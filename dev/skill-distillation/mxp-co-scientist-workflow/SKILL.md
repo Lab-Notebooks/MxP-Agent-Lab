@@ -38,3 +38,8 @@ python3 dev/workflow.py run-all --mode turbo --auto-gate-with-council
 # 4. Scaffold this 6-stage Co-Scientist workflow into a brand-new scientific repository
 python3 dev/workflow.py init-project /path/to/new-scientific-repo
 ```
+
+
+## Mandatory Gate 0 Rule: Deliverables Location (Default = Local Machine)
+- During **Stage 0 (`/grill-me` Intake)**, you **MUST** ask the user where all deliverables (final evolved code, speedup logs, simulation images/GIFs, raw field outputs, and Stage 5 packages) should live, with **Local Machine (`~/Documents/<project>-Deliverables/`)** as the `#1 (Recommended)` default option.
+- Even when compute or AlphaEvolve runs execute on remote Cloudtop/Argolis/Swarm nodes, you **MUST** automatically `rsync` all stage deliverables, plots, VTI/CSV outputs, and evolved source files back to the local machine directory at the end of each stage and display the speedup metrics, terminal outputs, final code, and simulated images directly to the user.

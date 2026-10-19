@@ -45,3 +45,11 @@ categories:
       selected_mode: "turbo"
       available_modes: ["cheap", "balanced", "turbo"]
       auto_gate_with_council: true
+  6_deliverables_and_output_destination:
+    question: "Where should all deliverables (evolved code, simulation plots/images, VTI/CSV outputs, speedup logs, and Stage 5 skill packages) be stored?"
+    default_recommendation: "(Recommended) Local Machine Workspace (~/Documents/<project>-Deliverables/) synced automatically at every stage, with inline terminal logs, speedup tables, evolved code, and rendered simulation images shown directly in chat (plus optional mirror to GitHub/Cloudtop)."
+    scientist_response:
+      primary_destination: "local_machine"
+      local_deliverables_path: "/Users/jacobsohn/Documents/MxP-MiniApp-Bubble-Deliverables"
+      auto_sync_each_stage: true
+      render_simulation_images_inline: true
