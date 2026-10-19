@@ -1,11 +1,10 @@
-# Copy to runs/<candidate>/verification.yaml; fill every <...>.
-# bmx make verify SPEC=dev/workflows/verify/runs/<candidate>/verification.yaml
+# Copy to experiments/<id>/verification.yaml; fill every <...>.
+# bmx make verify SPEC=experiments/<id>/verification.yaml   (output: experiments/<id>/results/verify/)
 
 candidate: "<commit / experiment>"
-dest: out_verify_<candidate>      # relative to the repo root
 tests: true                       # make check
 
-# cmd runs in app/; {out} = <dest>/<name>/out
+# cmd runs in app/; {out} = results/verify/<name>/out
 runs:
   - {name: eval, cmd: "<kernel.yaml run, mode=lowprec>"}
   - {name: alt, cmd: "<another configuration>"}
@@ -24,4 +23,4 @@ compare:
 
 # run from the repo root; exit 0 = pass
 checks: []
-#  - {name: <property>, cmd: "python3 dev/workflows/verify/runs/<candidate>/check_<property>.py"}
+#  - {name: <property>, cmd: "python3 experiments/<id>/check_<property>.py"}

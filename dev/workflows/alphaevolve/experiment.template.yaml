@@ -1,5 +1,5 @@
-# Copy to runs/<name>/experiment.yaml; fill every <...>. Rules here == rules in evaluator.py.
-# bmx make evolve EXP=dev/workflows/alphaevolve/runs/<name>
+# Copy to experiments/<id>/experiment.yaml; fill every <...>. Rules here == rules in evaluator.py.
+# bmx make evolve EXP=experiments/<id>
 
 # ae / Google Cloud
 project: "<numeric gcp project number>"   # gcloud projects describe <id> --format="value(projectNumber)"

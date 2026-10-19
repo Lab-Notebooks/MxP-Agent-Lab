@@ -2,7 +2,8 @@
 
     python3 dev/tools/local/verify.py <spec.yaml>     # or: make verify SPEC=<spec.yaml>
 
-The spec format is dev/workflows/verify/verification.template.yaml. In order:
+The spec format is dev/workflows/verify/verification.template.yaml. Output goes to
+<dest> = <spec dir>/results/verify. In order:
 
     1. make, then make check if tests: true (from the repo root)
     2. each run: its cmd in app/, with {out} = <dest>/<name>/out (absolute) and
@@ -46,7 +47,7 @@ class Verification:
             self.spec = yaml.safe_load(stream)
 
         self.specfile = specfile
-        self.dest = Path(self.spec.get("dest", "out_verify")).resolve()
+        self.dest = Path(specfile).resolve().parent / "results" / "verify"
         self.steps = []
         self.metrics = {}
         self.outdirs = {}

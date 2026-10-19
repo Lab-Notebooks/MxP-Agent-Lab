@@ -6,7 +6,7 @@ why it behaves as it does.
 ## Preconditions
 
 - The candidate is committed.
-- `../raptorize/runs/<kernel>/kernel.yaml` exists.
+- `E/kernel.yaml` exists.
 
 ## Ask
 
@@ -17,7 +17,6 @@ why it behaves as it does.
 | Run-vs-run comparisons and their limits? | across rank counts: the agreement the tests require |
 | Properties to check mechanically? | order of accuracy and conservation, if the kernel suggests them |
 | Questions the analysis must answer? | none |
-| Candidate name for `runs/<name>/`? | the alphaevolve experiment name |
 
 ## Checkpoints
 
@@ -28,9 +27,9 @@ why it behaves as it does.
 
 ## Boundaries
 
-- May write: `runs/<name>/`, the spec's `dest`.
+- May write: `E`.
 - Must not: edit `app/`, or change a limit without a new decision.
 
 ## Hand off
 
-Merge opens a PR (on approval). Sending back names the constraints for alphaevolve's next experiment.
+Merge opens a PR (on approval). Sending back names the constraints for alphaevolve, in the same `E`.

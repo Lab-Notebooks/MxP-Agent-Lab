@@ -3,7 +3,7 @@
 **Goal:** the kernel runs at `precision=fp64` (original), at RAPTOR formats (`BUBBLE_RAPTOR`
 builds), and at `lowprec` (a native seed in `// EVOLVE-BLOCK-START/END`), each next to an FP64 shadow.
 
-**Outputs:** the change in `app/`; `runs/<name>/raptorize.patch` and `runs/<name>/kernel.yaml`.
+**Outputs:** the change in `app/`; `E/raptorize.patch` and `E/kernel.yaml`.
 
 ## Code rules
 
@@ -24,9 +24,10 @@ builds), and at `lowprec` (a native seed in `// EVOLVE-BLOCK-START/END`), each n
 1. Read `example.patch` (toy kernel `applyKernel`) and the kernel's file. **Checkpoint 1.**
 2. Write the change for the kernel, following `example.patch`.
 3. Self-check: `git diff -U0 app | grep '^-[^-]'`; each line has a `RAPTOR: was` twin. **Checkpoint 2.**
-4. Gate commands: `make check`, `make RAPTOR=0 check`, `bmx make check`, then the eval run per mode.
+4. Gate commands: `make check`, `make RAPTOR=0 check`, `bmx make check`, then the eval run per mode
+   with `{out}` = `E/results/<mode>`.
    Pass: fp64 output unchanged; every other mode has a finite, nonzero error. **Checkpoint 3.**
-5. Record `runs/<name>/raptorize.patch` (`git diff`) and `runs/<name>/kernel.yaml`:
+5. Record `E/raptorize.patch` (`git diff`) and `E/kernel.yaml`:
    ```yaml
    source: src/<file>                # relative to app/
    objfile: build/<file>.o

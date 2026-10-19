@@ -1,0 +1,7 @@
+# LaTeX build files; keep only *.tex and the built *.pdf
+*.aux
+*.log
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.out

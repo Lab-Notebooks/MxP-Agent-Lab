@@ -63,7 +63,7 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
         source  : file with the EVOLVE-BLOCK, e.g. src/<file>, relative to app/
         objfile : its object file, for the disassembly audit, relative to app/
         command : run command, string, run in app/
-        outdir  : output directory of the run, relative to app/, removed before each run
+        outdir  : run output directory, relative to app/ or absolute; removed before each run
         metrics : list of metric names, primary first
         tag     : string carried by the names of the audited functions
         timeout : seconds allowed for the run

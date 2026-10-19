@@ -18,7 +18,6 @@ without changing what the app does at `fp64`.
 | Low-precision type of the seed? | `float` |
 | Error measures vs the FP64 shadow, and their CSV columns? | RMS and max of the main state field |
 | Eval run: input, size, ranks, steps? | a small, deterministic run under a minute |
-| Run name for `runs/<name>/`? | the kernel's function name |
 
 ## Checkpoints
 
@@ -30,9 +29,9 @@ without changing what the app does at `fp64`.
 
 ## Boundaries
 
-- May write: `app/src/`, `app/Makefile`, `app/params/`, `runs/<name>/`.
+- May write: `app/src/`, `app/Makefile`, `app/params/`, `E`.
 - Must not: touch `app/tests/`, the root `Makefile`, or `dev/tools/`.
 
 ## Hand off
 
-Next: alphaevolve, which reads `runs/<name>/kernel.yaml`.
+Next: alphaevolve, in the same `E`, which reads `E/kernel.yaml`.

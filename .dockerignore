@@ -11,4 +11,4 @@
 **/*.d
 **/*.bin
 dev/tools/RAPTOR/build/
-dev/workflows/**/results/
+experiments/*/results/

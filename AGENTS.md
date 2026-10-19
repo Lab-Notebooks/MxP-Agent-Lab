@@ -4,6 +4,8 @@
   - app/tools/ for output visualization and app-specific analysis
   - app/Makefile builds and tests it; its commands run in app/
 - Makefile (root) holds generic entry points and the RAPTOR toolchain.
+- experiments/<yyyy-mm-dd>[_N]/ holds every record of one pass through dev/workflows;
+  generated output in its results/ (gitignored).
 - dev/ is the agentic layer to orchestrate AI workflows for provenance. It is
   app/-agnostic:
   - dev/tools/RAPTOR: precision tool (submodule)

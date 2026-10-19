@@ -5,7 +5,7 @@ and help them choose one candidate.
 
 ## Preconditions
 
-- `../raptorize/runs/<kernel>/kernel.yaml` exists, and raptorize is committed.
+- `E/kernel.yaml` exists, and raptorize is committed.
 - `bmx make check` passes.
 - `bmx gcloud auth application-default print-access-token` succeeds; if not, the scientist runs
   `gcloud auth application-default login` on the host.
@@ -21,7 +21,6 @@ and help them choose one candidate.
 | Hints allowed in the prompt? | none |
 | GCP project, engine, location? | none; the scientist must supply these |
 | Job: models, max programs, concurrency, timeout per evaluation? | `max_programs` 20, `concurrency` 4, timeout 600 s |
-| Experiment name for `runs/<name>/`? | `<kernel>_<score>` |
 
 ## Checkpoints
 
@@ -33,11 +32,10 @@ and help them choose one candidate.
 
 ## Boundaries
 
-- May write: `runs/<name>/` (including `results/ae/`), `/tmp/canary_<name>/`. Write `app/src/<file>` only to apply
-  the chosen candidate.
+- May write: `E`, `/tmp/canary/`. Write `app/src/<file>` only to apply the chosen candidate.
 - Must not: edit the rules or score after seeing results without a new decision, or submit
   before Gate 1.
 
 ## Hand off
 
-Next: verify, on the applied candidate's commit.
+Next: verify, in the same `E`, on the applied candidate's commit.

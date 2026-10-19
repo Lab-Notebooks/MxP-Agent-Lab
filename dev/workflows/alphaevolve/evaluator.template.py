@@ -1,9 +1,9 @@
 """Module with implementation of the evaluator for experiment <name>.
 
-Copy to runs/<name>/evaluator.py and fill every TODO from the raptorize
-kernel.yaml and the scientist's metric. The Evaluator builds, audits and runs
-the candidate; any failure scores every metric None with the reason, so a
-broken or cheating candidate never scores.
+Copy to experiments/<id>/evaluator.py and fill every TODO from its kernel.yaml
+and the scientist's metric. The Evaluator builds, audits and runs
+the candidate; any failure scores null with the reason, so a broken or
+cheating candidate never scores.
 
 ae runs `evaluator.py --program-dir <dir> --output-file <json>`; without
 arguments it prints the result for the current tree.
@@ -34,10 +34,9 @@ sys.path.insert(0, str(ROOT / "dev/tools/local"))
 
 import evolve  # pylint: disable=wrong-import-position,import-error
 
-# TODO: settings from dev/workflows/raptorize/runs/<kernel>/kernel.yaml,
-# metrics from the scientist, primary first (ae optimizes the first).
-# Paths and the command are relative to app/.
-OUTDIR = "out_eval_<name>"
+# TODO: settings from experiments/<id>/kernel.yaml, metrics from the scientist,
+# primary first (ae optimizes the first). Source paths and the command are relative to app/.
+OUTDIR = ROOT / "experiments/<id>/results/eval"
 EVALUATOR = evolve.Evaluator(
     root=ROOT,
     source="src/<file>",
@@ -46,7 +45,7 @@ EVALUATOR = evolve.Evaluator(
     outdir=OUTDIR,
     metrics=["score", "accuracy"],
 )
-ERRORS = ROOT / evolve.APP / OUTDIR / "<errors csv>"
+ERRORS = OUTDIR / "<errors csv>"
 
 
 def evaluate():
