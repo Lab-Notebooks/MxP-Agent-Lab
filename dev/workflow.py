@@ -34,7 +34,45 @@ import shutil
 import subprocess
 import sys
 import time
-import tomllib
+try:
+    import tomllib  # Python 3.11+
+except ImportError:
+    class _TomlFallback:
+        @staticmethod
+        def load(fp: Any) -> dict[str, Any]:
+            raw = fp.read()
+            text = raw.decode("utf-8") if isinstance(raw, (bytes, bytearray)) else str(raw)
+            root: dict[str, Any] = {}
+            cur: dict[str, Any] = root
+            for line in text.splitlines():
+                s = line.strip()
+                if not s or s.startswith("#"):
+                    continue
+                if s.startswith("[") and s.endswith("]"):
+                    sec = s[1:-1].strip()
+                    cur = root
+                    for part in sec.split("."):
+                        cur = cur.setdefault(part, {})
+                    continue
+                if "=" in s:
+                    k, v = s.split("=", 1)
+                    key = k.strip()
+                    val = v.strip()
+                    if val.lower() == "true":
+                        cur[key] = True
+                    elif val.lower() == "false":
+                        cur[key] = False
+                    elif val.startswith('"') and val.endswith('"'):
+                        cur[key] = val[1:-1]
+                    elif val.startswith("'") and val.endswith("'"):
+                        cur[key] = val[1:-1]
+                    else:
+                        try:
+                            cur[key] = int(val) if "." not in val else float(val)
+                        except ValueError:
+                            cur[key] = val
+            return root
+    tomllib = _TomlFallback()  # type: ignore
 from pathlib import Path
 from typing import Any
 
@@ -97,9 +135,14 @@ def sha256_file(path: Path) -> str:
 
 def git_head_sha() -> str:
     try:
-        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, text=True).strip()
+        return subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT,
+            stderr=subprocess.DEVNULL,
+            text=True,
+        ).strip()
     except Exception:
-        return "unknown"
+        return "standalone-package"
 
 
 def load_budget_estimate(mode: str) -> dict[str, Any]:
@@ -176,6 +219,16 @@ def build_contextual_handoff_grill(stage_id: str, stage_manifest: dict[str, Any]
                 "estimated_alphaevolve_evals": est.get("estimated_alphaevolve_evals", 1280),
             },
             "grill_me_questions": [
+                {
+                    "id": "Q0_deliverables_location",
+                    "question": "Where should all stage outputs, speedup logs, final evolved C++ code, and simulation images/GIFs be stored?",
+                    "default_recommendation": "(Recommended) Local machine directory (./Deliverables/ or ~/Documents/MxP-MiniApp-Bubble-Deliverables/) with standardized 6-folder apples-to-apples layout.",
+                    "options": [
+                        "(Recommended) Local machine directory (./Deliverables/ or ~/Documents/MxP-MiniApp-Bubble-Deliverables/) with standardized 6-folder apples-to-apples layout.",
+                        "Both Local machine directory AND mirror to shared/cloud storage.",
+                        "Custom local path (enter path).",
+                    ],
+                },
                 {
                     "id": "Q0_1_hotspot_scope",
                     "question": "Stage 0 verified FPChecker, RAPTOR, and gcc/MPI toolchains, and detected that interior stencil state should be isolated for FP32 evolution. Should Stage 1 profile all 4 core kernels (advect, redistance, init, driver) on the 128x128 vortex benchmark?",
@@ -669,19 +722,84 @@ def print_status() -> None:
     print(json.dumps({"workflow_status": rows}, indent=2))
 
 
+def run_interactive_cli_campaign(budget_mode: str, approver: str) -> None:
+    """Standalone interactive terminal HITL /grill-me campaign runner (Zero Jetski Dependency)."""
+    print("\n================================================================================")
+    print("  AI CO-SCIENTIST 6-STAGE INTERACTIVE WORKFLOW (Antigravity + Argon Edition)")
+    print("================================================================================")
+    skip_remaining = False
+    summary = []
+    for st in STAGE_ORDER:
+        print(f"\n>>> Executing Stage: {st} (mode={budget_mode}) ...")
+        m = execute_stage(st, budget_mode=budget_mode, skip_hitl=skip_remaining, auto_council=False)
+        print(f"    [OK] {st} run_id={m['run_id']} metrics={json.dumps(m['metrics'])}")
+        if skip_remaining:
+            summary.append({"stage": st, "run_id": m["run_id"], "status": m["status"]})
+            continue
+
+        hfile = TRANS_DIR / st / "handoff_grill_to_next_stage.yaml"
+        handoff = build_contextual_handoff_grill(st, m)
+        questions = handoff.get("grill_me_questions", [])
+        answers: dict[str, str] = {}
+        print(f"\n--- Contextual HITL /grill-me Gate: {handoff.get('from_stage')} -> {handoff.get('to_stage')} ---")
+        for q in questions:
+            qid = q["id"]
+            qtext = q["question"]
+            rec = q.get("default_recommendation", "Approve")
+            opts = q.get("options") or [rec, "Custom write-in response", "Skip all remaining HITL gates"]
+            print(f"\n[{qid}] {qtext}")
+            for i, opt in enumerate(opts, 1):
+                print(f"  ({i}) {opt}")
+            print("  (s) Skip all remaining HITL gates and auto-approve")
+            try:
+                choice = input("Select [1 (default) / number / s / custom text]: ").strip()
+            except EOFError:
+                choice = "1"
+            if not choice or choice == "1":
+                answers[qid] = opts[0]
+            elif choice.lower() == "s":
+                answers[qid] = opts[0]
+                skip_remaining = True
+                break
+            elif choice.isdigit() and 1 <= int(choice) <= len(opts):
+                selected = opts[int(choice) - 1]
+                if "Custom" in selected:
+                    answers[qid] = input("Enter custom directive: ").strip() or rec
+                else:
+                    answers[qid] = selected
+            else:
+                answers[qid] = choice
+
+        handoff["scientist_interactive_answers"] = answers
+        write_simple_yaml(handoff, hfile)
+        approve_stage_gate(
+            st,
+            approver=approver,
+            mode="interactive-cli-hitl-gate",
+            notes=json.dumps(answers),
+        )
+        m["status"] = "COMPLETED_AND_GATE_APPROVED"
+        summary.append({"stage": st, "run_id": m["run_id"], "status": m["status"], "answers": answers})
+    print("\n================================================================================")
+    print(json.dumps({"interactive_campaign_complete": summary}, indent=2))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Co-Scientist 6-Stage Workflow & Contextual HITL /grill-me CLI")
-    parser.add_argument("target", help="Stage name (0..5, bootstrap, profile, evaluator, evolve, verify, package) or command (status, estimate, grill, run-all, init-project)")
+    parser.add_argument("target", help="Stage name (0..5, bootstrap, profile, evaluator, evolve, verify, package) or command (status, estimate, grill, run-interactive, run-all, init-project)")
     parser.add_argument("action", nargs="?", default="run", help="Action: run, status, gate, approve, rerun, or target path for init-project")
     parser.add_argument("--mode", default="turbo", choices=["cheap", "balanced", "turbo"], help="Budget & orchestration mode")
     parser.add_argument("--skip-hitl-gate", action="store_true", help="Optionally skip interactive HITL gate pause")
     parser.add_argument("--auto-gate-with-council", action="store_true", help="Let the Multi-Model Council answer contextual /grill-me handoff questions and sign approvals.toml")
-    parser.add_argument("--approver", default="Stephen Jacobsohn <jacobsohn@google.com>", help="Approver identity for manual gate sign-off")
+    parser.add_argument("--approver", default="Scientist Operator", help="Approver identity for manual gate sign-off")
     args = parser.parse_args()
 
     cmd = args.target.strip().lower()
     if cmd == "status":
         print_status()
+        return
+    if cmd == "run-interactive":
+        run_interactive_cli_campaign(budget_mode=args.mode, approver=args.approver)
         return
     if cmd == "estimate":
         res = {m: load_budget_estimate(m) for m in ("cheap", "balanced", "turbo")}

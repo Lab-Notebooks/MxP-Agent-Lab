@@ -21,7 +21,10 @@ import shutil
 import subprocess
 import sys
 import time
-import tomllib
+try:
+    import tomllib  # Python 3.11+
+except ImportError:
+    tomllib = None  # type: ignore
 from pathlib import Path
 from typing import Any
 
@@ -32,7 +35,7 @@ GUARDRAILS_TOML = DEV_DIR / "params" / "guardrails.toml"
 
 
 def load_toolchain() -> dict[str, Any]:
-    if TOOLCHAIN_TOML.is_file():
+    if tomllib is not None and TOOLCHAIN_TOML.is_file():
         with open(TOOLCHAIN_TOML, "rb") as f:
             return tomllib.load(f)
     return {}
