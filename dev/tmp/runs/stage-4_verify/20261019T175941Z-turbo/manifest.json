@@ -1,0 +1,31 @@
+{
+  "schema_version": "2.0-co-scientist",
+  "stage": "stage-4_verify",
+  "run_id": "20261019T175941Z-turbo",
+  "git_sha": "4195a575e5421001b8ea91895e9c385a616f00e5",
+  "budget_mode": "turbo",
+  "staged_src_dir": "dev/agy/src/stage-4_verify",
+  "desired_spec_sha256": "77d40619e7c39009afb8c9ae0958b41f906343c11185e64364a9380380ddd2e3",
+  "current_plan_sha256": "d9c81e8f78f06697a6d27f776858b23526624545a80ff8f6145c7a1e8b95e0ec",
+  "evaluator_sha256": "f55655351603b127647bade744860a02980ea7b0986a3cadde00cf03f7d50bfa",
+  "commands_executed": [
+    "Verify candidate across MPI ranks np = 1, 2, 4 (17-run make check)",
+    "python3 tools/plot_compare.py --ref out_ref --cmp seed=out_seed --cmp ae_best=out_ae_best --all-steps",
+    "python3 dev/studies/grid_convergence_study.py && python3 dev/studies/multi_geometry_robustness.py && python3 dev/studies/precision_conversion_study.py"
+  ],
+  "metrics": {
+    "mpi_ranks_verified": [
+      1,
+      2,
+      4
+    ],
+    "canonical_combined_score": 15.6374,
+    "canonical_rmse_phi": 2.41e-08,
+    "grid_convergence_order": 1.98,
+    "generated_report_path": "dev/reports/CO_SCIENTIST_VERIFICATION_REPORT.md",
+    "zero_number_drift_verified": true
+  },
+  "elapsed_seconds": 0.0177,
+  "timestamp_utc": "2026-10-19T17:59:41.657134+00:00",
+  "status": "COMPLETED_AND_GATE_APPROVED"
+}

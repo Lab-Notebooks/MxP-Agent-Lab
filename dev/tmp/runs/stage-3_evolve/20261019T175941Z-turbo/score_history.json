@@ -1,0 +1,32 @@
+{
+  "generations": [
+    {
+      "gen": 0,
+      "candidate": "seed_fp32",
+      "combined_score": 2.412,
+      "rmse_phi": 0.00384,
+      "passes_gate": false
+    },
+    {
+      "gen": 4,
+      "candidate": "kahan_compensated_fp32",
+      "combined_score": 9.841,
+      "rmse_phi": 4.12e-07,
+      "passes_gate": false
+    },
+    {
+      "gen": 9,
+      "candidate": "priest_twosum_weno5_fp32",
+      "combined_score": 14.219,
+      "rmse_phi": 6.85e-08,
+      "passes_gate": true
+    },
+    {
+      "gen": 15,
+      "candidate": "cand_01_ozaki_twosum_fp32",
+      "combined_score": 15.6374,
+      "rmse_phi": 2.41e-08,
+      "passes_gate": true
+    }
+  ]
+}

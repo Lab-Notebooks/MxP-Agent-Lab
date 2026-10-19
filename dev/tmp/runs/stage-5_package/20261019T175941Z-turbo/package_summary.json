@@ -1,0 +1,8 @@
+{
+  "portable_skill_path": "dev/skill-distillation/mxp-co-scientist-workflow",
+  "skill_md_sha256": "740639873f912def386bacca175f7580ce8036d24817c6c8d22667550f738d04",
+  "containerfile_path": "dev/skill-distillation/container_rollup/Containerfile",
+  "single_container_launcher": "run_container.sh",
+  "base_package_launcher": "reproduce_all.sh",
+  "init_project_cli": "python3 dev/workflow.py init-project <target-repo-path>"
+}

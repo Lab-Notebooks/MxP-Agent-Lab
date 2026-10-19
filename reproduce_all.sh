@@ -9,6 +9,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}"
 
+# Ensure OpenMPI works seamlessly inside single containers (root or rootless UID 0 + oversubscribe)
+export OMPI_ALLOW_RUN_AS_ROOT=1
+export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+export OMPI_MCA_rmaps_base_oversubscribe=1
+
 MODE="${1:---interactive}"
 OUT_DELIVERABLES="${DELIVERABLES_DIR:-${SCRIPT_DIR}/Deliverables}"
 

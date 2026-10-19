@@ -17,6 +17,16 @@
   },
   "grill_me_questions": [
     {
+      "id": "Q0_deliverables_location",
+      "question": "Where should all stage outputs, speedup logs, final evolved C++ code, and simulation images/GIFs be stored?",
+      "default_recommendation": "(Recommended) Local machine directory (./Deliverables/ or ~/Documents/MxP-MiniApp-Bubble-Deliverables/) with standardized 6-folder apples-to-apples layout.",
+      "options": [
+        "(Recommended) Local machine directory (./Deliverables/ or ~/Documents/MxP-MiniApp-Bubble-Deliverables/) with standardized 6-folder apples-to-apples layout.",
+        "Both Local machine directory AND mirror to shared/cloud storage.",
+        "Custom local path (enter path)."
+      ]
+    },
+    {
       "id": "Q0_1_hotspot_scope",
       "question": "Stage 0 verified FPChecker, RAPTOR, and gcc/MPI toolchains, and detected that interior stencil state should be isolated for FP32 evolution. Should Stage 1 profile all 4 core kernels (advect, redistance, init, driver) on the 128x128 vortex benchmark?",
       "default_recommendation": "Yes \u2014 profile all 4 kernels (advect, redistance, init, driver) with wall-clock timers, FPChecker cancellation traces, and RAPTOR bit-width sweeps (FP64, FP32, BF16, FP16)."

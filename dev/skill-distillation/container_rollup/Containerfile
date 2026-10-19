@@ -14,6 +14,9 @@ LABEL org.opencontainers.image.title="MxP-MiniApp-Bubble Co-Scientist Reproducib
 ENV DEBIAN_FRONTEND=noninteractive \
     TZ=Etc/UTC \
     PYTHONUNBUFFERED=1 \
+    OMPI_ALLOW_RUN_AS_ROOT=1 \
+    OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1 \
+    OMPI_MCA_rmaps_base_oversubscribe=1 \
     ARGON_MODEL="gemini-launch-candidate-high" \
     DELIVERABLES_DIR="/deliverables"
 

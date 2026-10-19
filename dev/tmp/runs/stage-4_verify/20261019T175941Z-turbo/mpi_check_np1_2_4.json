@@ -1,0 +1,22 @@
+{
+  "candidate": "cand_01_ozaki_twosum_fp32",
+  "ranks_tested": [
+    1,
+    2,
+    4
+  ],
+  "np_1": {
+    "rmse_phi": 2.41e-08,
+    "status": "PASS"
+  },
+  "np_2": {
+    "rmse_phi": 2.41e-08,
+    "max_diff_vs_np1": 0.0,
+    "status": "PASS"
+  },
+  "np_4": {
+    "rmse_phi": 2.41e-08,
+    "max_diff_vs_np1": 0.0,
+    "status": "PASS"
+  }
+}

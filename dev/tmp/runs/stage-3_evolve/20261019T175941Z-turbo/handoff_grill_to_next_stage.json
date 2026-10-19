@@ -1,0 +1,18 @@
+{
+  "from_stage": "stage-3_evolve",
+  "to_stage": "stage-4_verify",
+  "context_carried_forward": {
+    "winning_candidate": "cand_01_ozaki_twosum_fp32",
+    "best_combined_score": 15.6374,
+    "best_rmse_phi": 2.41e-08,
+    "fp64_ops_in_evolve_blocks": 0,
+    "alphaevolve_session_id": "15541367028299861796"
+  },
+  "grill_me_questions": [
+    {
+      "id": "Q3_1_verification_matrix",
+      "question": "Stage 3 candidate 'cand_01_ozaki_twosum_fp32' achieved score=15.6374 (RMSE=2.41e-08 <= 1e-7, 0 FP64 ops). Which Stage 4 verification checks must pass before promoting to src/?",
+      "default_recommendation": "Require (1) MPI determinism across np=1,2,4, (2) grid convergence across 64x64, 128x128, 256x256, (3) multi-geometry stress tests, and (4) machine-checked TwoSum error-bound proofs."
+    }
+  ]
+}
