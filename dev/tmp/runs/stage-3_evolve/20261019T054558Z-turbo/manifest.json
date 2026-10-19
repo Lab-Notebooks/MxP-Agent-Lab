@@ -1,0 +1,28 @@
+{
+  "schema_version": "2.0-co-scientist",
+  "stage": "stage-3_evolve",
+  "run_id": "20261019T054558Z-turbo",
+  "git_sha": "ffa43f0ccd46538fe3bd307abd5b31825f9f581a",
+  "budget_mode": "turbo",
+  "staged_src_dir": "dev/agy/src/stage-3_evolve",
+  "desired_spec_sha256": "ffd37b16ba14679c7de560847b8b3284475b94d1cd8bd2bcac0fb6529328aadf",
+  "current_plan_sha256": "93b2046a0bd67418c28dbd96e2c00cd4227013a55a9c7c96865b19d1bb6525a0",
+  "evaluator_sha256": "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9",
+  "commands_executed": [
+    "/usr/local/google/home/jacobsohn/bin/ae list-experiments",
+    "python3 dev/evaluators/evaluator.py --kernel coupled"
+  ],
+  "metrics": {
+    "alphaevolve_project_number": "603936599140",
+    "alphaevolve_engine_id": "alphaevolve-engine",
+    "alphaevolve_session_id": "15541367028299861796",
+    "winning_candidate": "cand_01_ozaki_twosum_fp32",
+    "best_combined_score": 15.6374,
+    "best_rmse_phi": 2.41e-08,
+    "fp64_ops_in_evolve_blocks": 0,
+    "speedup_vs_fp64": 1.56374
+  },
+  "elapsed_seconds": 2.1594,
+  "timestamp_utc": "2026-10-19T05:46:00.870821+00:00",
+  "status": "COMPLETED_AWAITING_GATE"
+}

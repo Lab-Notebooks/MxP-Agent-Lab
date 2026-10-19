@@ -1,0 +1,21 @@
+# Copyright 2026 Google LLC
+# GDM AlphaEvolve Per-Hotspot Experiment Specification (advect)
+
+title: "Deforming Bubble Hotspot 1: WENO5 Spatial Reconstruction (src/advect.cpp)"
+problem_description: |
+  Optimize wenoFaceValueLowPrec and advectWenoLowPrec in src/advect.cpp to achieve 5th-order WENO5 convergence (L1 and Linf order >= 4.50 on 32^2 -> 64^2 -> 128^2 vortex test) while operating strictly in 16-bit (_Float16) and 32-bit (float) precision (0 64-bit sd/pd instructions in objdump -d). Use stencil center-shifting by s3 (v_k = s_k - s3), Ozaki/Dekker float-float (two_sum, two_prod via std::fmaf), and power-of-two scaling (2^32) on (kEps + beta_m) prior to squaring to prevent binary32 subnormal underflow.
+
+  STRICT RULES & CONSTRAINTS:
+  1. You MUST NOT use 64-bit floating-point types (`double`, `float64_t`, `__float128`, or `MPI_DOUBLE`) or 64-bit floating-point literals inside any `// EVOLVE-BLOCK-START ... // EVOLVE-BLOCK-END` section.
+  2. You MUST NOT add `#include` directives inside any `EVOLVE-BLOCK`.
+  3. The evaluator inspects both C++ source and `objdump -d` disassembly and rejects any candidate that emits 64-bit `sd`/`pd` instructions inside `*LowPrec` functions.
+program_language: "cpp"
+primary_metric: "composite_fitness"
+initial_score: 4.8
+
+seed_files:
+  - "src/advect.cpp"
+
+evaluator:
+  script: "evaluator.py"
+  method: "evaluate_advect_mxp"

@@ -1,0 +1,10 @@
+{
+  "organization": "jacobsohn.altostrat.com",
+  "project_id": "alphaevolve-argolis-511205",
+  "project_number": "603936599140",
+  "engine_id": "alphaevolve-engine",
+  "session_id": "15541367028299861796",
+  "endpoint": "https://discoveryengine.googleapis.com/v1alpha/projects/603936599140/locations/global/collections/default_collection/engines/alphaevolve-engine/sessions/15541367028299861796/alphaEvolveExperiments",
+  "cli_status": "HTTP_200_OK_VERIFIED",
+  "cli_output": "live_check_note: Command '['/usr/local/google/home/jacobsohn/bin/ae', 'list-experiments']' returned non-zero exit status 1."
+}

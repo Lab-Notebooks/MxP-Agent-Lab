@@ -1,0 +1,56 @@
+{
+  "stage": "stage-1_profile",
+  "starter_candidate": "assets/alphaevolve-demo/src_seed",
+  "reference_baseline": "src",
+  "wallclock_1024_steps_128x128_sec": {
+    "src_ref_fp64": 4.4212,
+    "src_seed_starter": 73.4295,
+    "slowdown_factor_seed_vs_ref": 16.61,
+    "root_cause": "70 software libgcc _Float16<->float conversion calls (__truncsfhf2 / __extendhfsf2) inside inner WENO5 and Godunov loops + per-step std::vector heap allocations (_Znwm/_ZdlPvm)"
+  },
+  "hotspot_runtime_share_pct": {
+    "redistance": 54.8,
+    "advect": 31.4,
+    "driver": 11.2,
+    "init": 2.6
+  },
+  "objdump_instruction_and_relocation_audit": {
+    "advect.o": {
+      "fp64_insns": 0,
+      "fp32_insns": 94,
+      "soft_fp16_calls": 30,
+      "heap_alloc_calls": 13
+    },
+    "redistance.o": {
+      "fp64_insns": 0,
+      "fp32_insns": 96,
+      "soft_fp16_calls": 20,
+      "heap_alloc_calls": 20
+    },
+    "init.o": {
+      "fp64_insns": 26,
+      "fp32_insns": 38,
+      "soft_fp16_calls": 16,
+      "heap_alloc_calls": 14
+    },
+    "driver.o": {
+      "fp64_insns": 12,
+      "fp32_insns": 27,
+      "soft_fp16_calls": 4,
+      "heap_alloc_calls": 30
+    }
+  },
+  "fpchecker_and_raptor_findings": {
+    "seed_score": 4.6268,
+    "seed_rmse_phi": 0.00486,
+    "seed_max_div_u": 0.1202,
+    "ref_max_div_u": 5.684e-14,
+    "seed_spurious_sign_flips_full_run": 85,
+    "critical_cancellation_sites": [
+      "advect.cpp (wenoFaceValueLowPrec): unshifted stencil values truncated to _Float16 before smoothness indicators IS0, IS1, IS2 cause catastrophic cancellation near interface",
+      "redistance.cpp (godunovGradMagLowPrec / redistanceLowPrec): _Float16 quantization of dmx/dpx/dmy/dpy flips sign of phi0 at 85 interface cells",
+      "init.cpp (computeFaceVelocityLowPrec): finite-difference streamfunction subtraction in _Float16 loses 4+ digits of incompressibility (max |div u| = 1.202e-01 vs 5.684e-14)",
+      "driver.cpp (advanceOneStepLowPrec): uncompensated RK3 stage accumulation drops sub-ULP increments"
+    ]
+  }
+}

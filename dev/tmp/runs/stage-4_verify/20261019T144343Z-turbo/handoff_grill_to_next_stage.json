@@ -1,0 +1,21 @@
+{
+  "from_stage": "stage-4_verify",
+  "to_stage": "stage-5_package",
+  "context_carried_forward": {
+    "mpi_ranks_verified": [
+      1,
+      2,
+      4
+    ],
+    "grid_convergence_order": 1.98,
+    "report_path": "dev/reports/CO_SCIENTIST_VERIFICATION_REPORT.md",
+    "zero_number_drift_verified": true
+  },
+  "grill_me_questions": [
+    {
+      "id": "Q4_1_stage5_packaging",
+      "question": "Stage 4 passed all MPI (np=1,2,4), grid convergence, multi-geometry, and proof checks. For Stage 5 (Skill & Container Rollup), how should we package the workflow and its Stage 0 dependencies (FPChecker, RAPTOR, gcc-15, ae CLI)?",
+      "default_recommendation": "Generate (1) portable Antigravity Skill 'mxp-co-scientist-workflow', (2) self-contained Containerfile + swarm-node join script with all Stage 0 dependencies baked in, and (3) 'dev/workflow.py init-project' bootstrapper."
+    }
+  ]
+}

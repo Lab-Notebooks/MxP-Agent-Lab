@@ -6,7 +6,7 @@
     "frozen_evaluator_sha256": "c17276900ec83eb72afaeb69ebda2d8291bd14cfcb7f486f36ca951b4d5a7ce9",
     "baseline_fp64_score": 1.0,
     "seed_fp32_score": 2.412,
-    "cheats_rejected": "3/3"
+    "cheats_rejected": "4/4"
   },
   "grill_me_questions": [
     {
