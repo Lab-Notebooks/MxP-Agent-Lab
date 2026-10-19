@@ -1,0 +1,11 @@
+
+#include <stdio.h>
+
+float compute(float *x, int n) {
+  float res = 0.0f;
+  for (int i = 0; i < n; ++i) {
+    // Latent overflow
+    res = x[i] * -1.12345678e+36f;
+  }
+  return res;
+}
