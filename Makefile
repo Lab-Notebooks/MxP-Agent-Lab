@@ -1,66 +1,41 @@
-# Deforming Bubble mini-app -- build + check
+# Generic entry points of the lab.  This file knows only that the code under
+# study lives in app/ and is built by app/Makefile.  App-specific build logic
+# goes in app/Makefile; the workflows in dev/workflows/ never edit this file.
 #
-# Layout (see dev/tasks/init-project/spec.md, File map):
-#   src/*.cpp   -> ./bubble
-#   tests/test_*.cpp -> tests/<name> binaries, run by `make check`
-#
-# No -ffast-math (breaks the 1e-12 reproducibility tolerance, Spec "Silent traps").
+#   make [all|check|clean|debug]   delegated to app/Makefile
+#   make RAPTOR=0 ...              build without the RAPTOR plugin
+#   make image                     docker image for the containerized stages
+#   make evaluate EXP=<dir>        python3 <dir>/evaluator.py     (alphaevolve stage)
+#   make evolve EXP=<dir>          launch the ae experiment       (alphaevolve stage)
+#   make verify SPEC=<yaml>        dev/tools/local/verify.py      (verify stage)
 
-CXX      := mpicxx
-# OMPI_SKIP_MPICXX: only the C API is used; the deprecated C++ bindings
-# trip -Werror (cast-function-type) with newer compilers.
-CXXFLAGS := -std=c++17 -O2 -g -Wall -Wextra -Werror -MMD -MP -DOMPI_SKIP_MPICXX
-LDFLAGS  :=
-LDLIBS   := -lm
+IMAGE ?= bubble-mxp
 
-BIN      := bubble
-SRCDIR   := src
-OBJDIR   := build
-TESTDIR  := tests
+# RAPTOR toolchain (dev/tools/RAPTOR).  app/Makefile applies these only to the
+# files the raptorize stage marks.  RAPTOR=1 when the plugin is installed.
+RAPTOR_INSTALL_DIR ?= $(HOME)/raptor-install
+LLVM_VER           ?= 20
+RAPTOR_PLUGIN      := $(RAPTOR_INSTALL_DIR)/lib/LLVMRaptor-$(LLVM_VER).so
+RAPTOR             ?= $(if $(wildcard $(RAPTOR_PLUGIN)),1,0)
+RAPTOR_CXX         := clang++-$(LLVM_VER)
+RAPTOR_CXXFLAGS    := -DBUBBLE_RAPTOR=1 -I$(RAPTOR_INSTALL_DIR)/include -fpass-plugin=$(RAPTOR_PLUGIN)
+RAPTOR_LDLIBS      := -L$(RAPTOR_INSTALL_DIR)/lib -lRaptor-RT-$(LLVM_VER) -lmpfr -lstdc++
 
-SRCS     := $(sort $(wildcard $(SRCDIR)/*.cpp))
-OBJS     := $(patsubst $(SRCDIR)/%.cpp,$(OBJDIR)/%.o,$(SRCS))
-# everything except main.o, so tests can link the library part
-LIBOBJS  := $(filter-out $(OBJDIR)/main.o,$(OBJS))
+export RAPTOR RAPTOR_CXX RAPTOR_CXXFLAGS RAPTOR_LDLIBS
 
-TESTSRCS := $(sort $(wildcard $(TESTDIR)/test_*.cpp))
-TESTBINS := $(patsubst $(TESTDIR)/%.cpp,$(OBJDIR)/%,$(TESTSRCS))
+.PHONY: all check clean debug image evaluate evolve verify
 
-DEPS     := $(OBJS:.o=.d) $(TESTBINS:=.d)
+all check clean debug:
+	$(MAKE) -C app $@
 
-# test_rank_invariance / test_halo need more than one rank
-MPIRUN   := mpirun
-TIMEOUT  := timeout 600
+image:
+	docker build -t $(IMAGE) .
 
-.PHONY: all clean check debug tests dirs
+evaluate:
+	python3 $(EXP)/evaluator.py
 
-all: $(BIN)
+evolve:
+	python3 dev/tools/local/evolve.py $(EXP)
 
-$(BIN): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)
-
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp | $(OBJDIR)
-	$(CXX) $(CXXFLAGS) -I$(SRCDIR) -c -o $@ $<
-
-$(OBJDIR)/%: $(TESTDIR)/%.cpp $(LIBOBJS) | $(OBJDIR)
-	$(CXX) $(CXXFLAGS) -I$(SRCDIR) $(LDFLAGS) -o $@ $< $(LIBOBJS) $(LDLIBS)
-
-$(OBJDIR):
-	mkdir -p $(OBJDIR)
-
-tests: $(TESTBINS)
-
-# Each test binary is an MPI program. Ranks it should run on are declared by the
-# test itself through a `# ranks: ...` comment on its first lines; default 1.
-check: $(BIN) $(TESTBINS)
-	@sh tests/run_tests.sh "$(OBJDIR)" $(TESTBINS)
-
-debug:
-	$(MAKE) clean
-	$(MAKE) CXXFLAGS="-std=c++17 -O1 -g -Wall -Wextra -Werror -MMD -MP -fsanitize=address,undefined" \
-	        LDFLAGS="-fsanitize=address,undefined" all tests
-
-clean:
-	rm -rf $(OBJDIR) $(BIN)
-
--include $(DEPS)
+verify:
+	python3 dev/tools/local/verify.py $(SPEC)

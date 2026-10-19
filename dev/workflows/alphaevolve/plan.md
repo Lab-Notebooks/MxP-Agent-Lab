@@ -1,101 +1,36 @@
-# Stage 3, alphaevolve: plan
+# Plan: alphaevolve
 
-**Goal:** an evaluator whose score means what the scientist intends; AlphaEvolve
-jobs run against it; one candidate chosen and applied. Needs stage 2 (an
-EVOLVE-BLOCK and a low-precision `precision` mode). Runs in the project
-container. Writes only to `experiments/<name>/`, and to `src/` only when a
-candidate is applied.
+**Goal:** evolve the `lowprec` seed under the agreed score, then apply one candidate to `app/src/`.
 
-**Scientist decides:**
-- the error measure the score uses, from the columns stage 1 records:
-  - global: a field norm of state minus shadow (RMS, Linf, band-restricted), averaged over snapshots or taken at the final time
-  - scalar: a quantity-of-interest error, e.g. |area - area_ref|
+**Inputs:** `../raptorize/runs/<kernel>/kernel.yaml`. **Outputs:** `runs/<name>/` holding
+`experiment.yaml`, `evaluator.py` and `results/`. Container commands use `bmx` (`AGENTS.md`),
+which mounts the host's Google Cloud credentials.
 
-  If the measure isn't recorded, go back to stage 1 and add it.
-- the primary metric, its formula and gates
-- the hard rules
-- the hints allowed in the prompt
-- the eval configuration and time limit
-- the job budget and stop criteria
-- which candidate to apply
+AlphaEvolve runs through the `ae` CLI: GCP generates candidates, and `evaluator.py` scores each one
+locally in the container.
 
 ## Steps
 
-0. **Set up:**
-   ```sh
-   docker build -t bubble-mxp .      # the image build runs make check on the stage-2 tree
-   alias bmx='docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work bubble-mxp'
-   X=dev/workflows/alphaevolve/experiments/<name>; mkdir -p $X/results
-   ```
-1. **Write the experiment** with the scientist:
-   - `$X/experiment.yaml`, from `experiment.template.yaml`. Fill every `<...>`.
-     `problem_description` states exactly the rules the evaluator enforces.
-   - `$X/evaluator.py`, from `evaluator.template.py`. Fill every `TODO`:
-     - the evolved file and object file
-     - the eval params and the run command for the stage-2 mode
-     - the scientist's metric formula and gates
-     - the method name, which must match `experiment.yaml`
-
-     Keep the template's safety checks:
-     - build failure -> null scores
-     - source token audit + disassembly audit -> null scores
-     - timeout, crash, NaN -> null scores
-2. **Check:**
-   - `seed_files` exist and each has exactly one balanced pair of markers:
-     `grep -n "EVOLVE-BLOCK-" <file>`.
-   - `primary_metric` is one of the evaluator's metrics.
-   - The method and `postprocess` named in `experiment.yaml` exist in `evaluator.py`.
-3. **Calibrate:**
-   ```sh
-   bmx python3 $X/evaluator.py | tee $X/results/baseline.json   # twice
-   ```
-   - Scores that don't depend on timing must match exactly; timing-based ones
-     within a few percent.
-   - Record the seed's scores in `$X/results/baseline.json` and in the
-     Experiments table of `README.md`.
-4. **Red-team.** Never do this in the repo:
-   ```sh
-   rsync -a --exclude .git --exclude build --exclude 'out*' ./ /tmp/canary_<name>/
-   docker run --rm --user "$(id -u):$(id -g)" -v /tmp/canary_<name>:/work bubble-mxp python3 $X/evaluator.py
-   ```
-   Make one edit at a time in the copy's block. Each must come back with null
-   scores, or, for the last one, a score below the seed's:
-   - a `double` local
-   - an unsuffixed literal such as `x * 0.1` on a float
+1. With `X=dev/workflows/alphaevolve/runs/<name>`, fill `$X/experiment.yaml` and `$X/evaluator.py`
+   from the templates. Use `kernel.yaml` for the paths and run command. The prompt states exactly
+   the rules the evaluator enforces.
+2. Calibrate: run `bmx make evaluate EXP=$X` twice; non-timing scores must match exactly.
+   Save as `$X/results/baseline.json`. **Checkpoint 1.**
+3. Red-team in a copy, `rsync -a --exclude .git ./ /tmp/canary_<name>/`, one edit at a time
+   inside the block:
+   - a `double`
+   - an inexact unsuffixed literal (`* 1.1`)
    - an `#include`
-   - an FP helper whose name lacks the audit tag and isn't inlined
-   - skipping the work (output left untouched)
+   - an untagged FP helper
+   - skipped work
 
-   Then delete `/tmp/canary_<name>`. Any cheat that scores means the rules are
-   too loose: tighten them and go back to step 3.
-5. **Gate 1, before any job.** The scientist reviews `experiment.yaml`,
-   `evaluator.py`, the baseline and the red-team results, and confirms the job
-   settings.
-6. **Submit and monitor:**
-   ```sh
-   tar --exclude-vcs --exclude=build --exclude='out*' --exclude=dev/tools/RAPTOR \
-       --exclude='*/results' -czf $X/results/bundle.tar.gz .
-   <platform CLI> ... $X $X/results/bundle.tar.gz      # depends on the AlphaEvolve deployment
-   ```
-   Report the score history per generation. Point out jumps much larger than
-   the trend for the scientist: they usually mean a loophole. When the job
-   ends, `postprocess` writes the best program to `$X/results/best/src/...`.
-7. **Review candidates.** For each top candidate:
-   - show `diff` against the seed
-   - re-score it in a scratch copy with the same evaluator
-   - summarise what changed numerically
-
-   Candidates stay in `$X/results/`, never in `src/`.
-8. **Gate 2: the scientist picks one.** Apply it:
-   ```sh
-   diff -u src/<file>.cpp $X/results/best/src/<file>.cpp | less   # show the scientist first
-   cp $X/results/best/src/<file>.cpp src/<file>.cpp
-   ```
-   Commit on the stage branch, then go to stage 4 (`dev/workflows/verify/plan.md`).
-
-## Must not
-
-- Edit `src/`, `tests/`, `Makefile` or `params/` (except applying the chosen
-  candidate, and a new eval ini the scientist agreed to).
-- Change a rule or weight after seeing job results without the scientist's
-  agreement.
+   Each must score null or below the seed; otherwise tighten the rules and redo step 2.
+   **Checkpoint 2.**
+4. **Checkpoint 3** (Gate 1).
+5. Launch: `bmx make evolve EXP=$X`. This creates the experiment, uploads the seed with its baseline,
+   and runs the evaluation loop until `max_programs`. Monitor from another shell with `AE_CONFIG_DIR=$X/results/ae`:
+   `ae experiment describe <nick>`, `ae results best <nick>`. **Checkpoint 4** at each progress report.
+6. For each top candidate: `ae program show <prog> --output-file $X/results/<prog>.cpp`, diff vs seed,
+   re-score in a scratch copy, explain the numerics.
+   **Checkpoint 5** (Gate 2).
+7. Apply the chosen candidate: show `diff -u`, copy `$X/results/<prog>.cpp` over the seed, run `make check`.

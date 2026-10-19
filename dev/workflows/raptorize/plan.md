@@ -1,40 +1,37 @@
-# Stage 1, raptorize: plan
+# Plan: raptorize
 
-**Goal:** the scientist's kernel can run at RAPTOR-truncated precision next to
-an FP64 shadow of the state, selected by `precision=` in `params/*.ini` or on
-the command line. Everything else stays FP64.
+**Goal:** the kernel runs at `precision=fp64` (original), at RAPTOR formats (`BUBBLE_RAPTOR`
+builds), and at `lowprec` (a native seed in `// EVOLVE-BLOCK-START/END`), each next to an FP64 shadow.
 
-**Scientist decides:**
-- the kernel: which function(s) in which `src/` file
-- the formats, as RAPTOR (exponent, mantissa) bits, e.g. fp32 (8, 23), tf32 (8, 10), bf16 (8, 7), fp16 (5, 10)
-- which error measures to record against the FP64 shadow, so stage 3 can choose its score from them:
-  - global field errors: `err_l2` (RMS), `err_linf`, band-restricted norms
-  - scalar quantity-of-interest errors: e.g. `area - area_ref`, mass, or a probe value
+**Outputs:** the change in `app/`; `runs/<name>/raptorize.patch` and `runs/<name>/kernel.yaml`.
+
+## Code rules
+
+- Only add code; never rename, move, reorder, reformat or refactor existing code.
+- New code goes in `// RAPTOR-BEGIN: <purpose>` … `// RAPTOR-END` blocks (`#` in Makefiles).
+- Added line in existing code: `// RAPTOR`. Changed line: `// RAPTOR: was <old line>`.
+- `__raptor_truncate_op_func(fn, 64, 1, E, M)` truncates `fn` and its callees in the
+  same file; one cached call per format (`dev/tools/RAPTOR/Readme.md`).
+- RAPTOR code sits under `#ifdef BUBBLE_RAPTOR`; `make RAPTOR=0` still runs `fp64` and `lowprec`.
+- The shadow calls the existing step unchanged, at `fp64`, same dt.
+- EVOLVE-BLOCK: no 64-bit FP, no `#include`, FP helpers named `*LowPrec*`. The fp64 <-> low
+  conversion sits outside, without `LowPrec` in its name.
+- Build changes go in `app/Makefile`, using `RAPTOR*` variables from the root `Makefile`.
+- Each error measure is a column appended to a CSV the app writes.
 
 ## Steps
 
-1. Read `example.patch`. It applies the pattern to a toy kernel
-   (`kernelPoint` / `applyKernel`):
-   - `params.h`: a `Precision` enum and the `precision` key
-   - the kernel's file:
-     - `#ifdef BUBBLE_RAPTOR` with one `__raptor_truncate_op_func(fn, 64, 1, E, M)` per format
-     - `precisionAvailable()`
-     - an `<kernel>At(m, ...)` dispatch
-   - `driver.cpp`: the call goes through the dispatch; an FP64 shadow is
-     advanced with the same dt, and its error is computed
-   - `Makefile`: only the kernel's file is compiled with clang plus the RAPTOR
-     plugin when `RAPTOR_INSTALL_DIR` has it; `make RAPTOR=0` still builds
-2. Write the same change for the scientist's kernel in this repo. Also add:
-   - one history column per recorded error measure
-   - the summary lines in `main.cpp`
-   - the `precision` key in `params/bubble.ini`
-3. Save it, then gate:
-   ```sh
-   mkdir -p dev/workflows/raptorize/patches && git diff > dev/workflows/raptorize/patches/<kernel>.patch
-   make && make check                                    # green
-   make clean && make RAPTOR=0 && make check RAPTOR=0    # green without RAPTOR
-   mpirun -np 2 ./bubble params/bubble.ini precision=bf16 max_steps=40 outdir=out_bf16   # error > 0
+1. Read `example.patch` (toy kernel `applyKernel`) and the kernel's file. **Checkpoint 1.**
+2. Write the change for the kernel, following `example.patch`.
+3. Self-check: `git diff -U0 app | grep '^-[^-]'`; each line has a `RAPTOR: was` twin. **Checkpoint 2.**
+4. Gate commands: `make check`, `make RAPTOR=0 check`, `bmx make check`, then the eval run per mode.
+   Pass: fp64 output unchanged; every other mode has a finite, nonzero error. **Checkpoint 3.**
+5. Record `runs/<name>/raptorize.patch` (`git diff`) and `runs/<name>/kernel.yaml`:
+   ```yaml
+   source: src/<file>                # relative to app/
+   objfile: build/<file>.o
+   audit_tag: LowPrec
+   modes: [fp64, <formats>, lowprec]
+   run: "<eval command>"             # run in app/; {mode}, {out} substituted
+   errors: {csv: "<file in {out}>", columns: [<columns>]}
    ```
-   - The fp64 output (history, fields) is unchanged in the original columns.
-   - `tests/` are untouched.
-   - The scientist reviews the patch and commits.

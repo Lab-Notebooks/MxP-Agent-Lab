@@ -1,0 +1,27 @@
+# Copy to runs/<candidate>/verification.yaml; fill every <...>.
+# bmx make verify SPEC=dev/workflows/verify/runs/<candidate>/verification.yaml
+
+candidate: "<commit / experiment>"
+dest: out_verify_<candidate>      # relative to the repo root
+tests: true                       # make check
+
+# cmd runs in app/; {out} = <dest>/<name>/out
+runs:
+  - {name: eval, cmd: "<kernel.yaml run, mode=lowprec>"}
+  - {name: alt, cmd: "<another configuration>"}
+
+# csv: file in {out}; reduce: last | maxabs | mean | rms. Or log: regex, last match in run.log.
+metrics:
+  rms: {csv: "<csv>", column: "<column>", reduce: rms}
+
+# <metric>_max / <metric>_min, every run; missing fails
+criteria:
+  rms_max: <tol>
+
+# max |run - ref| over columns
+compare:
+  - {name: alt_vs_eval, run: alt, ref: eval, csv: "<csv>", columns: ["<column>"], max: <tol>}
+
+# run from the repo root; exit 0 = pass
+checks: []
+#  - {name: <property>, cmd: "python3 dev/workflows/verify/runs/<candidate>/check_<property>.py"}

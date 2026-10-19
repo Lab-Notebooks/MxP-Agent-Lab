@@ -1,13 +1,14 @@
+# Build outputs anywhere in the tree (app/build, app/bubble, app/out_*, ...)
 .git
 **/__pycache__
-build/
-build_raptor/
-bubble
-bubble_raptor
-out/
-out_*/
-*.o
-*.d
-*.bin
+**/build/
+**/build_raptor/
+**/bubble
+**/bubble_raptor
+**/out/
+**/out_*/
+**/*.o
+**/*.d
+**/*.bin
 dev/tools/RAPTOR/build/
 dev/workflows/**/results/

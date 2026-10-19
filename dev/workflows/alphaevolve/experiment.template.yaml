@@ -1,51 +1,33 @@
-# experiment.yaml template: copy it to experiments/<name>/experiment.yaml and fill
-# it in with the scientist.  The AlphaEvolve platform reads all of it; the
-# evaluator (from evaluator.template.py) must enforce every rule stated here.
+# Copy to runs/<name>/experiment.yaml; fill every <...>. Rules here == rules in evaluator.py.
+# bmx make evolve EXP=dev/workflows/alphaevolve/runs/<name>
 
-title: "<Deforming Bubble: what is evolved, in which file>"
+# ae / Google Cloud
+project: "<numeric gcp project number>"   # gcloud projects describe <id> --format="value(projectNumber)"
+location: global
+engine: "<alphaevolve engine id>"
+models: ["<model>"]
 
-# What the model sees.  It must state exactly what the evaluator enforces: if a
-# rule is here but not in evaluator.py it is a suggestion; if it is in
-# evaluator.py but not here, candidates fail for reasons the model cannot see.
-problem_description: |
-  <One paragraph: which functions inside the EVOLVE-BLOCK of which file, and
-  what "better" means.>
+# job
+title: "<what is evolved>"
+seed: "app/src/<file>"            # uploaded as initial_program.py
+language: cpp
+max_programs: <n>
+concurrency: 4                    # parallel generations; evaluations run one at a time
+timeout: 600                      # seconds per evaluation
 
-  HOW IT IS EVALUATED
-  - <build command, compiler, flags>
-  - <the run: params file, overrides, problem size, ranks, time limit>
-  - <the error measure: global (field norm of state - FP64 shadow, e.g. RMS over snapshots)
-     or scalar (a quantity-of-interest error, e.g. |area - area_ref|), and its history.csv column>
-  - <each score and its formula, from which file (history.csv column, run log line)>
-  - <primary metric = ...; gates, e.g. speed only counts while RMS <= tol>
+problem: |
+  <The functions in the EVOLVE-BLOCK, and what "better" means.>
 
-  STRICT RULES  (each one checked by evaluator.py; a violation scores null)
-  1. <e.g. no 64-bit FP tokens inside the EVOLVE-BLOCK; no *sd/*pd instructions
-     in the *LowPrec functions of the object file; suffix literals with f>
-  2. <e.g. no #include inside the block>
-  3. <signatures and contracts that must not change (inputs, guard cells, accumulate into rhs)>
-  4. <naming rule for helpers so the audit sees them (contain "LowPrec")>
+  EVALUATION
+  - <build; eval run from kernel.yaml at precision=lowprec>
+  - <error vs FP64 shadow: CSV column, reduction>
+  - <scores and formulas; the first is optimized; gates>
 
-  NUMERICAL GUIDANCE  (hints the scientist allows; not enforced)
-  - <cancellation-aware formulations, scaling, eps choice, ...>
-  - <hardware notes: vector ISA, native vs emulated formats>
+  RULES (violation scores null)
+  1. No 64-bit floating point in the EVOLVE-BLOCK; suffix literals with f.
+  2. No #include in the block.
+  3. FP helpers have "LowPrec" in their names.
+  4. <fixed signatures and contracts>
 
-program_language: "cpp"
-primary_metric: "<one metric name returned by evaluator.py>"
-
-# Files that carry EVOLVE-BLOCKs (stage 2 put them there); paths from the repo root.
-seed_files:
-  - "src/<file>.cpp"
-
-evaluator:
-  script: "evaluator.py"         # in this experiment directory
-  method: "<evaluate_...>"       # () -> {"scores": [{metric, score}], "insights": [{label, text}]}
-  postprocess: "postprocess"     # (top_programs) -> writes results/best/<seed path>
-
-# Job settings (model, generations, population, budget, stop criteria) depend on
-# the AlphaEvolve deployment: record the agreed values here as comments and pass
-# them through ALPHAEVOLVE_SUBMIT_CMD.
-#   model:        <...>
-#   generations:  <...>
-#   budget:       <...>
-#   stop when:    <score plateau / wall-clock / candidate count>
+  HINTS
+  - <allowed guidance>
