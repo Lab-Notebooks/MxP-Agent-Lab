@@ -1,0 +1,16 @@
+services:
+  mxp-coscientist:
+    build:
+      context: .
+      dockerfile: dev/skill-distillation/container_rollup/Containerfile
+    image: mxp-coscientist-argon:3.0
+    stdin_open: true
+    tty: true
+    environment:
+      - ARGON_MODEL=${ARGON_MODEL:-gemini-launch-candidate-high}
+      - ARGON_API_KEY=${ARGON_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-}
+      - DELIVERABLES_DIR=/deliverables
+    volumes:
+      - ./Deliverables:/deliverables

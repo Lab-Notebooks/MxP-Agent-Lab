@@ -1,0 +1,96 @@
+# syntax=docker/dockerfile:1.7
+# ==============================================================================
+# MxP Co-Scientist + AlphaEvolve Reproducibility Container
+# Target Environment: Antigravity (`antigravity` CLI / `google-antigravity` SDK) + Argon
+# Strict Policy: ZERO `jetski` dependencies or internal corp binaries
+# ==============================================================================
+
+FROM ubuntu:24.04
+
+LABEL org.opencontainers.image.title="MxP-MiniApp-Bubble Co-Scientist Reproducibility Container (Antigravity + Argon)" \
+      org.opencontainers.image.description="Self-contained 6-stage AI Co-Scientist environment with OpenMPI, LLVM/Clang, FPChecker, RAPTOR, Antigravity, Argon client, and native VTI simulation plotting" \
+      org.opencontainers.image.version="3.0.0-antigravity-argon"
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    TZ=Etc/UTC \
+    PYTHONUNBUFFERED=1 \
+    ARGON_MODEL="gemini-launch-candidate-high" \
+    DELIVERABLES_DIR="/deliverables"
+
+# 1. System Compilers, OpenMPI, LLVM/Clang-18, and Scientific Build Dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        gcc \
+        g++ \
+        clang-18 \
+        llvm-18 \
+        llvm-18-dev \
+        lld-18 \
+        cmake \
+        make \
+        git \
+        curl \
+        wget \
+        ca-certificates \
+        jq \
+        binutils \
+        openmpi-bin \
+        libopenmpi-dev \
+        libmpfr-dev \
+        libgmp-dev \
+        python3 \
+        python3-pip \
+        python3-venv \
+        python3-dev \
+        rsync \
+    && ln -sf /usr/bin/clang-18 /usr/bin/clang \
+    && ln -sf /usr/bin/clang++-18 /usr/bin/clang++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Install Public Linux Antigravity Binary (/usr/local/bin/antigravity & /usr/local/bin/agy — ZERO jetski symlink)
+RUN ARCH="$(uname -m)" && \
+    if [ "${ARCH}" = "x86_64" ]; then AGY_ARCH="x64"; else AGY_ARCH="arm64"; fi && \
+    curl -fsSL "https://storage.googleapis.com/antigravity-public/antigravity-hub/2.19.1-6046815158665216/unsigned/language_server-linux-${AGY_ARCH}" \
+        -o /usr/local/bin/antigravity && \
+    chmod 0755 /usr/local/bin/antigravity && \
+    ln -sf /usr/local/bin/antigravity /usr/local/bin/agy && \
+    printf '#!/bin/sh\nexec "/usr/local/bin/antigravity" agentapi "$@"\n' > /usr/local/bin/agentapi && \
+    chmod 0755 /usr/local/bin/agentapi
+
+# 3. Clone & Build LLNL FPChecker and RIKEN-RCCS RAPTOR for Stage 1 Precision Profiling
+RUN git clone --depth 1 https://github.com/llnl/FPChecker.git /opt/fpchecker && \
+    mkdir -p /opt/fpchecker/build && cd /opt/fpchecker/build && \
+    cmake -DCMAKE_CXX_COMPILER=clang++-18 .. && make -j"$(nproc)" || true
+
+RUN git clone --depth 1 https://github.com/RIKEN-RCCS/RAPTOR.git /opt/raptor && \
+    mkdir -p /opt/raptor/build && cd /opt/raptor/build && \
+    cmake -DCMAKE_CXX_COMPILER=clang++-18 .. && make -j"$(nproc)" || true
+
+# 4. Python Virtual Environment with Google Antigravity SDK, GenAI, and Native Plotting Stack
+RUN python3 -m venv /opt/coscientist-venv && \
+    /opt/coscientist-venv/bin/pip install --no-cache-dir --upgrade pip && \
+    /opt/coscientist-venv/bin/pip install --no-cache-dir \
+        "numpy>=1.26" \
+        "scipy>=1.11" \
+        "matplotlib>=3.8" \
+        "Pillow>=10.0" \
+        "httpx>=0.27" \
+        "google-genai>=1.0" \
+        "google-auth>=2.28" \
+        "typer>=0.12" \
+        "rich>=13.7" \
+        "pyyaml>=6.0" && \
+    /opt/coscientist-venv/bin/pip install --no-cache-dir "google-antigravity" || true
+
+ENV PATH="/opt/coscientist-venv/bin:/usr/local/bin:/usr/bin:/bin"
+
+# 5. Copy Full Runnable Package & Supporting Material into /workspace/mxp-miniapp-bubble
+WORKDIR /workspace/mxp-miniapp-bubble
+COPY . /workspace/mxp-miniapp-bubble/
+
+# 6. Pre-compile the evolved MPI binary so container is ready for immediate verification or re-evolution
+RUN make clean && make -j"$(nproc)" || true
+
+VOLUME ["/deliverables"]
+ENTRYPOINT ["/workspace/mxp-miniapp-bubble/reproduce_all.sh"]
+CMD ["--interactive"]
