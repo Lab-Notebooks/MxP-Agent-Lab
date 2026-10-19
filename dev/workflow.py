@@ -324,8 +324,8 @@ def build_contextual_handoff_grill(stage_id: str, stage_manifest: dict[str, Any]
             "grill_me_questions": [
                 {
                     "id": "Q4_1_stage5_packaging",
-                    "question": "Stage 4 passed all MPI (np=1,2,4), grid convergence, multi-geometry, and proof checks. For Stage 5 (Skill & Container Rollup), how should we package the workflow and its Stage 0 dependencies (FPChecker, RAPTOR, gcc-15, ae CLI)?",
-                    "default_recommendation": "Generate (1) portable Antigravity Skill 'mxp-co-scientist-workflow', (2) self-contained Containerfile + swarm-node join script with all Stage 0 dependencies baked in, and (3) 'dev/workflow.py init-project' bootstrapper.",
+                    "question": "Stage 4 passed all MPI (np=1,2,4), grid convergence, multi-geometry, and proof checks. For Stage 5 (Skill & Single-Container Rollup), how should we package the workflow and its Stage 0 dependencies (FPChecker, RAPTOR, gcc-15, OpenMPI, Antigravity + Argon)?",
+                    "default_recommendation": "Generate (1) portable Antigravity Skill 'mxp-co-scientist-workflow', (2) self-contained Single-Container image (Containerfile + run_container.sh) with all Stage 0 dependencies baked in, and (3) 'dev/workflow.py init-project' bootstrapper.",
                 },
             ],
         }
@@ -337,7 +337,7 @@ def build_contextual_handoff_grill(stage_id: str, stage_manifest: dict[str, Any]
             "grill_me_questions": [
                 {
                     "id": "Q5_1_final_signoff",
-                    "question": "Stage 5 distilled the portable Antigravity Skill and Containerized Swarm Rollup. Ready to finalize campaign and push under /dev?",
+                    "question": "Stage 5 distilled the portable Antigravity Skill and Single-Container Reproducibility Package. Ready to finalize campaign?",
                     "default_recommendation": "Approve final campaign completion.",
                 },
             ],
@@ -616,14 +616,15 @@ def execute_stage(stage_id: str, budget_mode: str = "turbo", skip_hitl: bool = F
 
     elif stage_id == "stage-5_package":
         commands_run.append("Package reusable Antigravity Skill: dev/skill-distillation/mxp-co-scientist-workflow/SKILL.md")
-        commands_run.append("Package Containerized Antigravity Rollup: dev/skill-distillation/container_rollup/Containerfile")
+        commands_run.append("Package Single-Container Antigravity + Argon Rollup: dev/skill-distillation/container_rollup/Containerfile + run_container.sh")
         skill_dir = DEV_DIR / "skill-distillation" / "mxp-co-scientist-workflow"
         rollup_dir = DEV_DIR / "skill-distillation" / "container_rollup"
         metrics = {
             "portable_skill_path": str(skill_dir.relative_to(REPO_ROOT)),
             "skill_md_sha256": sha256_file(skill_dir / "SKILL.md"),
             "containerfile_path": str((rollup_dir / "Containerfile").relative_to(REPO_ROOT)),
-            "swarm_join_script": str((rollup_dir / "build_and_join_swarm.sh").relative_to(REPO_ROOT)),
+            "single_container_launcher": "run_container.sh",
+            "base_package_launcher": "reproduce_all.sh",
             "init_project_cli": "python3 dev/workflow.py init-project <target-repo-path>",
         }
         (rdir / "package_summary.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
@@ -667,8 +668,8 @@ def execute_stage(stage_id: str, budget_mode: str = "turbo", skip_hitl: bool = F
         )
 
     if skip_hitl or auto_council:
-        approver = "ArgonClaw-MultiModel-Council (Gemini-4-Argon + Opus-5.5 + Fable-5.1)" if auto_council else "Operator-Skip-HITL-Flag"
-        mode_label = "auto-gate-with-council" if auto_council else "skip-hitl-gate"
+        approver = "Antigravity-Argon-SingleAgent (gemini-launch-candidate-high)" if auto_council else "Operator-Skip-HITL-Flag"
+        mode_label = "auto-gate-single-agent" if auto_council else "skip-hitl-gate"
         approve_stage_gate(stage_id, approver=approver, mode=mode_label, notes=f"Contextual /grill-me handoff verified automatically from {run_id}")
         manifest["status"] = "COMPLETED_AND_GATE_APPROVED"
         (rdir / "manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
