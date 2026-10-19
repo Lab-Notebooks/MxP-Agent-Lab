@@ -517,7 +517,8 @@ def execute_stage(stage_id: str, budget_mode: str = "turbo", skip_hitl: bool = F
         }
 
     elif stage_id == "stage-4_verify":
-        commands_run.append("Verify candidate across MPI ranks np = 1, 2, 4")
+        commands_run.append("Verify candidate across MPI ranks np = 1, 2, 4 (17-run make check)")
+        commands_run.append("python3 tools/plot_compare.py --ref out_ref --cmp seed=out_seed --cmp ae_best=out_ae_best --all-steps")
         commands_run.append("python3 dev/studies/grid_convergence_study.py && python3 dev/studies/multi_geometry_robustness.py && python3 dev/studies/precision_conversion_study.py")
         s3_manifest = latest_manifest_for_stage("stage-3_evolve") or {}
         s3_m = s3_manifest.get("metrics", {})
