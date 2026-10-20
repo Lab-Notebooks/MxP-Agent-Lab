@@ -12,8 +12,8 @@ the decisions in raptorize's plan.md; the prompt states exactly the rules the ev
 - Calibrate: `bmx make evaluate EXP=$R` twice; non-timing scores match exactly; save as
   results/baseline.json.
 - Red-team in /tmp/canary/ (`rsync -a --exclude .git ./ /tmp/canary/`), one edit at a time inside
-  the block: a double, an inexact unsuffixed literal (`* 1.1`), an #include, an untagged FP
-  helper, skipped work. Each scores null or below the seed; otherwise tighten and recalibrate.
+  the block: a double, an inexact unsuffixed literal (`* 1.1`), an #include, an untagged helper
+  computing in double via `auto`, skipped work; and one edit outside the block. Each scores null or below the seed; otherwise tighten and recalibrate.
 - Launch: `bmx make evolve EXP=$R`; monitor with `AE_CONFIG_DIR=$R/results/ae`
   `ae experiment describe <nick>`, `ae results best <nick>`.
 - Candidates: `ae program show <prog> --output-file results/<prog>.cpp`, diff vs seed, re-score
@@ -21,7 +21,7 @@ the decisions in raptorize's plan.md; the prompt states exactly the rules the ev
 
 ## Preconditions
 
-- Raptorize is committed, with its decisions in its plan.md.
+- Raptorize is completed, with its decisions in its plan.md.
 - `bmx make check` passes.
 - `bmx gcloud auth application-default print-access-token` succeeds; if not, the scientist runs
   `gcloud auth application-default login` on the host.

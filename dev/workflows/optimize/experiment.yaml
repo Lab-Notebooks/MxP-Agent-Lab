@@ -25,9 +25,10 @@ problem: |
 
   RULES (violation scores null)
   1. No 64-bit floating point in the EVOLVE-BLOCK; suffix literals with f.
-  2. No #include in the block.
-  3. FP helpers have "LowPrec" in their names.
-  4. <fixed signatures and contracts>
+  2. No preprocessor directive (#include, #define, ...) in the block.
+  3. Every function defined in the block has "LowPrec" in its name.
+  4. Code outside the EVOLVE-BLOCK is unchanged.
+  5. <fixed signatures and contracts>
 
   HINTS
   - <allowed guidance>

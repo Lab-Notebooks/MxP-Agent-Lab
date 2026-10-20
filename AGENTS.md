@@ -26,3 +26,6 @@
   ```
 
 - Keep code and docs succinct: every line is reviewed. Respect the directory layout.
+
+- Git: never stage, commit, amend or reset. Leave every change modified in the working tree;
+  the scientist reviews and commits.

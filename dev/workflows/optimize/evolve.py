@@ -31,8 +31,24 @@ FORBIDDEN_TOKENS = [
     r"\bfloat64_t\b",
     r"\b__float128\b",
     r"\bMPI_DOUBLE\b",
-    r"#\s*include",
+    r"(?m)^\s*#",  # any preprocessor directive: #include, or a #define that hides a name
 ]
+
+# An EVOLVE-BLOCK, its body captured
+BLOCK = re.compile(
+    r"^\s*// EVOLVE-BLOCK-START\s*\n(.*?)^\s*// EVOLVE-BLOCK-END",
+    re.MULTILINE | re.DOTALL,
+)
+
+# Comments and string literals, removed before the source scans
+COMMENTS = re.compile(r"//[^\n]*|/\*.*?\*/|\"(?:\\.|[^\"\\])*\"", re.DOTALL)
+
+# A function definition: name, parameter list (one level of nested parentheses), then {
+DEFINITION = re.compile(
+    r"(?<![\w\]])([A-Za-z_]\w*)\s*\((?:[^(){};]|\([^(){};]*\))*\)\s*(?:const\s*)?"
+    r"(?:noexcept\s*)?\{"
+)
+KEYWORDS = {"if", "for", "while", "switch", "catch", "return", "sizeof"}
 
 # x86-64 scalar/packed double-precision arithmetic (SSE2 / AVX / FMA)
 FORBIDDEN_ASM = re.compile(
@@ -107,11 +123,17 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
             encoding="utf-8"
         )
 
-        source.write_text(candidate, encoding="utf-8")
-        try:
-            result = evaluate()
-        finally:
-            source.write_text(original, encoding="utf-8")
+        if BLOCK.sub("", candidate) != BLOCK.sub("", original):
+            result = self.fail(
+                "CHANGED_OUTSIDE_BLOCK",
+                f"{self.source}: only code inside an EVOLVE-BLOCK may change.",
+            )
+        else:
+            source.write_text(candidate, encoding="utf-8")
+            try:
+                result = evaluate()
+            finally:
+                source.write_text(original, encoding="utf-8")
 
         Path(args.output_file).write_text(json.dumps(result), encoding="utf-8")
 
@@ -147,10 +169,11 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
         Check that the EVOLVE-BLOCK holds no 64-bit floating point
 
         1. token scan of every EVOLVE-BLOCK in self.source
-        2. disassembly scan of every function in self.objfile whose name contains self.tag
+        2. every function defined in a block carries self.tag in its name
+        3. disassembly scan of every function in self.objfile whose name contains self.tag
 
-        A helper without the tag that is not inlined escapes the second scan,
-        so the prompt must require the naming rule.
+        With the code outside the blocks fixed (main), 2 and 3 cover all the block's code:
+        what is not inlined into a tagged function is a tagged function itself.
 
         Returns
         -------
@@ -160,15 +183,17 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
         if not blocks:
             return [("MISSING_EVOLVE_BLOCK", f"{self.source} has no EVOLVE-BLOCK.")]
 
-        # Token scan
+        # Token and naming scans
         for index, block in enumerate(blocks, start=1):
-            code = re.sub(
-                r"//.*|/\*.*?\*/|\"(?:\\.|[^\"\\])*\"", "", block, flags=re.DOTALL
-            )
+            code = COMMENTS.sub("", block)
             for token in FORBIDDEN_TOKENS:
                 if re.search(token, code):
                     text = f"'{token}' inside EVOLVE-BLOCK #{index} of {self.source}."
                     return [("FORBIDDEN_TOKEN", text)]
+            for name in DEFINITION.findall(code):
+                if name not in KEYWORDS and self.tag not in name:
+                    text = f"function '{name}' in EVOLVE-BLOCK #{index}: name it *{self.tag}*."
+                    return [("UNTAGGED_FUNCTION", text)]
 
         # Disassembly scan
         objfile = self.appdir / self.objfile
@@ -265,9 +290,7 @@ def evolve_blocks(source):
     """
     List of code blocks between // EVOLVE-BLOCK-START and // EVOLVE-BLOCK-END
     """
-    text = Path(source).read_text(encoding="utf-8")
-    pattern = r"^\s*// EVOLVE-BLOCK-START\s*\n(.*?)^\s*// EVOLVE-BLOCK-END"
-    return re.findall(pattern, text, re.MULTILINE | re.DOTALL)
+    return BLOCK.findall(Path(source).read_text(encoding="utf-8"))
 
 
 def read_csv(filename):
