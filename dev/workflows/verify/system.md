@@ -8,14 +8,14 @@ plan.md, every check a line of Python) and R/analysis.md.
 
 ## Checks the plan includes
 
-- Pin the candidate: `git log -1`, `git diff --stat <raptorize commit>`.
+- Pin the candidate: `git log -1`, `git status app`, `make patch OUT=R/patches/0-pin.patch`.
 - Run `bmx make verify EXP=$R`, which writes R/results/verify/summary.md.
 - analysis.md answers the scientist's questions, cites the file behind every number, and labels
   hand arguments informal. app/'s tools may help.
 
 ## Preconditions
 
-- The candidate is committed.
+- The candidate is in app/, committed or not.
 
 ## Ask: question, then the default to propose
 

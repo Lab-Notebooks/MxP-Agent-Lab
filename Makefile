@@ -8,6 +8,7 @@
 #   make evaluate EXP=<dir>        python3 <dir>/evaluator.py     (optimize stage)
 #   make evolve EXP=<dir>          launch the ae experiment       (optimize stage)
 #   make verify EXP=<dir>          python3 <dir>/verification.py  (verify stage)
+#   make patch OUT=<file>          save app/'s changes since HEAD, untracked included
 
 IMAGE ?= bubble-mxp
 
@@ -23,7 +24,7 @@ RAPTOR_LDLIBS      := -L$(RAPTOR_INSTALL_DIR)/lib -lRaptor-RT-$(LLVM_VER) -lmpfr
 
 export RAPTOR RAPTOR_CXX RAPTOR_CXXFLAGS RAPTOR_LDLIBS
 
-.PHONY: all check clean debug image evaluate evolve verify
+.PHONY: all check clean debug image evaluate evolve verify patch
 
 all check clean debug:
 	$(MAKE) -C app $@
@@ -39,3 +40,8 @@ evolve:
 
 verify:
 	python3 $(EXP)/verification.py
+
+# Throwaway index: the real index is never touched.
+patch:
+	@i=$$(mktemp -u) && export GIT_INDEX_FILE=$$i && git read-tree HEAD && git add -A app \
+	  && git diff --cached --binary HEAD -- app > $(OUT); r=$$?; rm -f $$i; exit $$r

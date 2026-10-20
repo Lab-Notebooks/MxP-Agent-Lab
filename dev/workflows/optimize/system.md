@@ -17,7 +17,7 @@ the decisions in raptorize's plan.md; the prompt states exactly the rules the ev
 - Launch: `bmx make evolve EXP=$R`; monitor with `AE_CONFIG_DIR=$R/results/ae`
   `ae experiment describe <nick>`, `ae results best <nick>`.
 - Candidates: `ae program show <prog> --output-file results/<prog>.cpp`, diff vs seed, re-score
-  in a scratch copy. Apply by copying over the seed, then `make check`.
+  in a scratch copy. Apply by copying over the seed, then `make check`; never commit.
 
 ## Preconditions
 
@@ -61,4 +61,4 @@ the decisions in raptorize's plan.md; the prompt states exactly the rules the ev
 
 ## Hand off
 
-Next: verify, in the same E, on the applied candidate's commit.
+Next: verify, in the same E, on the applied candidate in app/ (the scientist commits it).

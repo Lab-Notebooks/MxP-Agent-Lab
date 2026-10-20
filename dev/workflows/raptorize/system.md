@@ -4,7 +4,7 @@ Role: add precision modes, an FP64 shadow and an EVOLVE-BLOCK seed to one kernel
 changing what the app does at fp64. Modes: fp64 (original), RAPTOR formats (BUBBLE_RAPTOR builds)
 and lowprec (a native seed), each next to an FP64 shadow.
 
-Outputs: the change in app/ and R/raptorize.patch (git diff). The decisions in R/plan.md are the
+Outputs: the change in app/ and its patches, R/patches/ (protocol.md). The decisions in R/plan.md are the
 keys under Ask.
 
 ## Code rules
@@ -53,10 +53,11 @@ keys under Ask.
 ## Checkpoints
 
 1. Scope, after reading the kernel: the files to touch, FP callees in other files (they stay
-   FP64), and the planned blocks. Ask to proceed.
-2. Diff, after the self-check: `git diff --stat`, every `RAPTOR: was` line. Ask for review.
+   FP64), and the planned blocks. Save patches/1-scope.patch; ask to proceed.
+2. Diff, after the self-check: `git diff --stat`, every `RAPTOR: was` line. Save patches/2-diff.patch;
+   ask for review.
 3. Results, after the gate: pass/fail per command, and the final error per mode as a table.
-   Ask to record and commit.
+   Save patches/3-results.patch; ask to record. The scientist commits.
 
 ## Boundaries
 
