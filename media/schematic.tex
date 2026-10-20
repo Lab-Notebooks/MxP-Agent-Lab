@@ -39,7 +39,7 @@
 
   % Stages, each worked by an agent, and the signed-off gates between them
   \foreach \n/\x/\t/\d in {rap/0/raptorize/{precision modes\\+ EVOLVE-BLOCK seed},
-                          ae/3.6/alphaevolve/{evolve the seed\\under a trusted score},
+                          ae/3.6/optimize/{evolve the seed\\under a trusted score},
                           ver/7.2/verify/{tests, checks,\\analysis}} {
     \node[stage] (\n) at (\x,0) {\textbf{\t}\\[1pt]{\scriptsize\d}};
     \path ([xshift=-10pt]\n.north east) pic{agent};
@@ -64,8 +64,8 @@
     {{\small\bfseries\color{black}Computational Laboratory}\ \
      container (\ttfamily Dockerfile\normalfont): toolchain, RAPTOR, \ttfamily ae\normalfont\\[2pt]
      each stage: ask $\to$ record $\to$ work $\to$ checkpoint $\to$ gate $\to$ hand off\\
-     {\ttfamily\color{black}dev/workflows/} (system.md, plan.md) $\cdot$
-     {\ttfamily\color{black}dev/tools/} (RAPTOR, evolve.py, verify.py)};
+     {\ttfamily\color{black}dev/workflows/<stage>/} (system.md, templates, code) $\cdot$
+     {\ttfamily\color{black}dev/tools/RAPTOR}};
 
   % Pages of the notebook the lab writes to
   \node[page, fill=black!4, text width=4.1cm, below=0.9cm of lab.south -| rap.east, anchor=north]
@@ -75,8 +75,7 @@
     {\textbf{\ttfamily experiments/<yyyy-mm-dd>/}\\[2pt]
      \ttfamily\scriptsize
      \begin{tabular}{@{}l@{\quad}l@{}}
-       decisions.md & evaluator.py\\ raptorize.patch & verification.yaml\\
-       kernel.yaml & analysis.md\\ experiment.yaml & results/
+       README.md & 2-optimize/\\ 1-raptorize/ & 3-verify/
      \end{tabular}};
   \draw[->] (lab.south -| app.north) -- node[lbl, right] {patch, build,\\run \& test} (app.north);
   \draw[->] (lab.south -| exp.north) -- node[lbl, right] {records\\every step} (exp.north);

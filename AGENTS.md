@@ -1,23 +1,26 @@
-- app/ is the code being optimized; it changes per project:
-  - app/src/ the code, app/tests/ its tests
-  - app/params/ for initializing and running the application
-  - app/tools/ for output visualization and app-specific analysis
-  - app/Makefile builds and tests it; its commands run in app/
-- Makefile (root) holds generic entry points and the RAPTOR toolchain.
-- experiments/<yyyy-mm-dd>[_N]/ holds every record of one pass through dev/workflows;
-  generated output in its results/ (gitignored).
-- dev/ is the agentic layer to orchestrate AI workflows for provenance. It is
-  app/-agnostic:
-  - dev/tools/RAPTOR: precision tool (submodule)
-  - dev/tools/local: shared python (evolve.py Evaluator, verify.py Verification)
-  - dev/workflows: staged workflows (raptorize -> alphaevolve -> verify); each is
-    started by a scientist. Follow dev/workflows/system.md, then the stage's system.md
-    (how to interact) and plan.md (what to do).
-- Python style: black, pylint-clean, numpy-style docstrings,
-  classes only for state + behaviour, plain functions otherwise.
-- make image --> builds the docker image (bubble-mxp)
-- alias bmx='mkdir -p ~/.config/gcloud && docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work -v "$HOME/.config/gcloud":/tmp/.config/gcloud bubble-mxp' --> shorthand; container HOME is /tmp
-- bmx make check
-- Keep code and docs succinct: every line is reviewed.
+- app/ is the code being optimized; it changes per project, so learn its layout.
 
-Respect the current directory organization to do your work.
+- Makefile (root) holds generic entry points and the RAPTOR toolchain.
+
+- dev/ is the app/-agnostic agentic layer for provenance:
+  * README.md: start here
+  * workflows/: protocol.md (plan and run modes, shared), and one folder per stage,
+    raptorize → optimize → verify, each started by a scientist; a stage folder holds
+    its contract (system.md), templates, code shapes and code
+  * tools/RAPTOR: precision submodule
+
+- Stages are classes: dev/workflows/<stage>/ is the class, E/<n>-<stage>/ an instance (E = experiments/<yyyy-mm-dd>).
+  * Lower, never raise, the scientist's cognitive burden; they may or may not be expert.
+    Study the code before proposing, and explain choices so a non-expert can follow.
+  * Two modes: plan (write plan.md with the scientist, proposing defaults instead of
+    asking) and run (execute it). Plans are succinct and self-contained: nothing to infer.
+
+- Python: black, pylint-clean, numpy docstrings, classes only for state + behaviour.
+
+- Docker: `make image` builds bubble-mxp; `bmx make check` tests, with (container HOME is /tmp):
+
+  ```sh
+  alias bmx='mkdir -p ~/.config/gcloud && docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work -v "$HOME/.config/gcloud":/tmp/.config/gcloud bubble-mxp'
+  ```
+
+- Keep code and docs succinct: every line is reviewed. Respect the directory layout.

@@ -1,5 +1,5 @@
-# Copy to experiments/<id>/experiment.yaml; fill every <...>. Rules here == rules in evaluator.py.
-# bmx make evolve EXP=experiments/<id>
+# Copy to E/<n>-optimize/experiment.yaml; fill every <...>. Rules here == rules in evaluator.py.
+# bmx make evolve EXP=E/<n>-optimize
 
 # ae / Google Cloud
 project: "<numeric gcp project number>"   # gcloud projects describe <id> --format="value(projectNumber)"
@@ -19,7 +19,7 @@ problem: |
   <The functions in the EVOLVE-BLOCK, and what "better" means.>
 
   EVALUATION
-  - <build; eval run from kernel.yaml at precision=lowprec>
+  - <build; the run from raptorize's plan.md, mode lowprec>
   - <error vs FP64 shadow: CSV column, reduction>
   - <scores and formulas; the first is optimized; gates>
 

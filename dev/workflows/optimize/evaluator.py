@@ -1,7 +1,7 @@
 """Module with implementation of the evaluator for experiment <name>.
 
-Copy to experiments/<id>/evaluator.py and fill every TODO from its kernel.yaml
-and the scientist's metric. The Evaluator builds, audits and runs
+Copy to E/<n>-optimize/evaluator.py and fill every TODO from the decisions in
+raptorize's plan.md and the scientist's metric. The Evaluator builds, audits and runs
 the candidate; any failure scores null with the reason, so a broken or
 cheating candidate never scores.
 
@@ -17,31 +17,33 @@ from pathlib import Path
 
 def repo_root():
     """
-    Repository root: $LAB_ROOT, else the first parent with app/ and dev/tools/local/
+    Repository root: $LAB_ROOT, else the first parent with app/ and dev/workflows/optimize/
     """
     if os.environ.get("LAB_ROOT"):
         return Path(os.environ["LAB_ROOT"]).resolve()
 
     for directory in [Path.cwd(), *Path(__file__).resolve().parents]:
-        if (directory / "app").is_dir() and (directory / "dev/tools/local").is_dir():
+        if (directory / "app").is_dir() and (
+            directory / "dev/workflows/optimize"
+        ).is_dir():
             return directory
 
     return Path.cwd()
 
 
 ROOT = repo_root()
-sys.path.insert(0, str(ROOT / "dev/tools/local"))
+sys.path.insert(0, str(ROOT / "dev/workflows/optimize"))
 
 import evolve  # pylint: disable=wrong-import-position,import-error
 
-# TODO: settings from experiments/<id>/kernel.yaml, metrics from the scientist,
+# TODO: source, run and errors from raptorize's plan.md, metrics from the scientist,
 # primary first (ae optimizes the first). Source paths and the command are relative to app/.
-OUTDIR = ROOT / "experiments/<id>/results/eval"
+OUTDIR = Path(__file__).resolve().parent / "results/eval"
 EVALUATOR = evolve.Evaluator(
     root=ROOT,
     source="src/<file>",
     objfile="build/<file>.o",
-    command="<kernel.yaml run>".format(mode="lowprec", out=OUTDIR),
+    command="<run>".format(mode="lowprec", out=OUTDIR),
     outdir=OUTDIR,
     metrics=["score", "accuracy"],
 )

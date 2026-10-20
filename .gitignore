@@ -11,5 +11,5 @@ out_eval/
 *.d
 *.bin
 __pycache__/
-experiments/*/results/
+experiments/**/results/
 out_*/

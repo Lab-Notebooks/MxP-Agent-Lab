@@ -1,10 +1,10 @@
 """Module with implementation of the Evaluator class and its helpers.
 
-An experiment's evaluator.py (dev/workflows/alphaevolve/evaluator.template.py)
+An experiment's evaluator.py (dev/workflows/optimize/evaluator.py)
 creates one Evaluator with its settings and adds only the score formula; the
 ae CLI runs it (see Evaluator.main). launch() starts the ae experiment:
 
-    python3 dev/tools/local/evolve.py <experiment dir>    # or: make evolve EXP=<dir>
+    python3 dev/workflows/optimize/evolve.py <experiment dir>    # or: make evolve EXP=<dir>
 
 Nothing here knows what is in app/: it is built with `make` from the repo root,
 and its commands and paths are relative to app/.

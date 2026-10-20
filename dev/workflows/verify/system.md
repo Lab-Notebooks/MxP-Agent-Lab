@@ -3,10 +3,19 @@
 Role: help the scientist decide from data whether the applied candidate merges, and explain
 why it behaves as it does.
 
+Outputs: `R/verification.py` (`dev/workflows/verify/verification.py`; runs from raptorize's
+`plan.md`, every check a line of Python) and `R/analysis.md`.
+
+## Checks the plan includes
+
+- Pin the candidate: `git log -1`, `git diff --stat <raptorize commit>`.
+- Run `bmx make verify EXP=$R`, which writes `R/results/verify/summary.md`.
+- `analysis.md` answers the scientist's questions, cites the file behind every number, and labels
+  hand arguments **informal**. `app/tools/` may help.
+
 ## Preconditions
 
 - The candidate is committed.
-- `E/kernel.yaml` exists.
 
 ## Ask
 
@@ -20,16 +29,16 @@ why it behaves as it does.
 
 ## Checkpoints
 
-1. **Spec**: the filled `verification.yaml` and the planned `check_*.py` files. Ask to run.
+1. **Script**: the filled `verification.py`. Ask to run.
 2. **Results**: `summary.md`, plus every failing step with its log line. Ask about any failure
    before writing the analysis.
-3. **Gate**: `analysis.md`. Ask: merge, or back to alphaevolve with which new constraints.
+3. **Gate**: `analysis.md`. Ask: merge, or back to optimize with which new constraints.
 
 ## Boundaries
 
-- May write: `E`.
+- May write: `R`, `E/README.md`.
 - Must not: edit `app/`, or change a limit without a new decision.
 
 ## Hand off
 
-Merge opens a PR (on approval). Sending back names the constraints for alphaevolve, in the same `E`.
+Merge opens a PR (on approval). Sending back names the constraints for optimize, in the same `E`.

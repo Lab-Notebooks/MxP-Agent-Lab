@@ -1,4 +1,4 @@
-# One image for the containerized workflow stages (dev/workflows/).
+# One image for the containerized workflow stages (dev/).
 #
 #   make image                          # docker build -t bubble-mxp .
 #   docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work bubble-mxp make check
