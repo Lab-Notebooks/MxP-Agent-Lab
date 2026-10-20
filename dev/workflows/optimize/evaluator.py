@@ -41,8 +41,8 @@ import evolve  # pylint: disable=wrong-import-position,import-error
 OUTDIR = Path(__file__).resolve().parent / "results/eval"
 EVALUATOR = evolve.Evaluator(
     root=ROOT,
-    source="src/<file>",
-    objfile="build/<file>.o",
+    source="<kernel file>",
+    objfile="<its object file>",
     command="<run>".format(mode="lowprec", out=OUTDIR),
     outdir=OUTDIR,
     metrics=["score", "accuracy"],

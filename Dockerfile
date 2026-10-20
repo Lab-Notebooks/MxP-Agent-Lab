@@ -3,7 +3,7 @@
 #   make image                          # docker build -t bubble-mxp .
 #   docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work bubble-mxp make check
 #
-# The build runs the test suite against the src/ in the build context, so an
+# The build runs the test suite against the tree in the build context, so an
 # image only exists for a tree that passes `make check`.  At run time the repo
 # is mounted over /work, so the stages work on (and write into) the live tree.
 #

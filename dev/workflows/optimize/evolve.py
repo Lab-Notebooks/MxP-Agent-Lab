@@ -60,7 +60,7 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
         Parameters
         ----------
         root    : repository root, where `make` builds the app
-        source  : file with the EVOLVE-BLOCK, e.g. src/<file>, relative to app/
+        source  : the kernel's file, with the EVOLVE-BLOCK, relative to app/
         objfile : its object file, for the disassembly audit, relative to app/
         command : run command, string, run in app/
         outdir  : run output directory, relative to app/ or absolute; removed before each run

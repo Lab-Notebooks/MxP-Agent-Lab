@@ -9,7 +9,7 @@ models: ["<model>"]
 
 # job
 title: "<what is evolved>"
-seed: "app/src/<file>"            # uploaded as initial_program.py
+seed: "app/<kernel file>"         # from raptorize's plan.md; uploaded as initial_program.py
 language: cpp
 max_programs: <n>
 concurrency: 4                    # parallel generations; evaluations run one at a time

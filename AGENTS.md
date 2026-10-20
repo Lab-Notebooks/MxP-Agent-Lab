@@ -1,4 +1,5 @@
-- app/ is the code being optimized; it changes per project, so learn its layout.
+- app/ is the code being optimized; it changes per project, so learn its layout. It must meet
+  dev/workflows/app.md.
 
 - Makefile (root) holds generic entry points and the RAPTOR toolchain.
 
@@ -6,10 +7,11 @@
   * README.md: start here
   * workflows/: protocol.md (plan and run modes, shared), and one folder per stage,
     raptorize → optimize → verify, each started by a scientist; a stage folder holds
-    its contract (system.md), templates, code shapes and code
+    its contract (system.md), templates, worked examples and code
   * tools/RAPTOR: precision submodule
 
-- Stages are classes: dev/workflows/<stage>/ is the class, E/<n>-<stage>/ an instance (E = experiments/<yyyy-mm-dd>).
+- Stages are classes: dev/workflows/<stage>/ is the class, E/<n>-<stage>/ an instance
+  (E = experiments/<yyyy-mm-dd>).
   * Lower, never raise, the scientist's cognitive burden; they may or may not be expert.
     Study the code before proposing, and explain choices so a non-expert can follow.
   * Two modes: plan (write plan.md with the scientist, proposing defaults instead of
