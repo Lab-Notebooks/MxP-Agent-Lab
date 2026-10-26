@@ -24,8 +24,9 @@ lower error vs the FP64 shadow, score each candidate locally, and apply the one 
 - speed: not counted (template default; float vs fp64 runtimes are equal at this size).
 - extra rules: none beyond the template; rule 4 fixes the contract below.
 - hints: none.
-- GCP project, engine, models: none; the scientist supplies them. location: global.
-- job: max_programs 20, concurrency 4, timeout 600 s.
+- GCP: project <redacted>, engine
+  <redacted>, models gemini-3-flash-preview (= preset GEMINI_V3P0_MIXTURE), location global.
+- job: max_programs 10 (scientist, 2026-10-22; was 20), concurrency 4, timeout 600 s.
 
 ## Source change
 
@@ -73,8 +74,30 @@ None in app/ before Gate 2. New in R = experiments/2026-10-20/2-optimize:
    UNTAGGED_FUNCTION; outside edit: CHANGED_OUTSIDE_BLOCK) or below (skip 2.225); seed 9.272,
    recalibrated identical.
 3. Gate 1: experiment.yaml, evaluator.py, baseline, red-team, job. Submit?
+   Outcome (2026-10-22): approved with max_programs 10. app/ re-applied from raptorize.patch;
+   seed re-scored 9.272190599222778; ADC via container login; launched as exp-free-hyena.
+   evolve.py crashed after `experiment start` (non-JSON stdout); the run loop was started by
+   hand; fixed in evolve.py (`_call`, not `_json`).
+   exp-free-hyena: 9/9 candidates null, an evaluator bug: ae runs a copy of evaluator.py in a
+   temp dir, so OUTDIR's parent was missing and the app crashed (prog-broad-agama scores
+   9.201 when run by hand). Fixed in evolve.py (prepare creates OUTDIR's parent); relaunched.
 4. Progress: best score per generation; flag jumps. Continue or stop?
+   Results (exp-ginger-chimpanzee, 10 programs, seed 9.272): 9.165, 9.206, null
+   (COMPILATION_ERROR: unused sqrLowPrec, -Werror), 9.271, 9.388, 9.247, 9.246, 9.210, 9.388,
+   9.388. Jump +0.116 (RMS error 1.31x lower) at prog-nano-chihuahua; pink-guppy equal,
+   humongous-macaw 9.388239. It writes the WENO face value as s3 + (1/6) * weighted
+   differences of neighbours, instead of a weighted sum of three full-size stencils.
 5. Gate 2: top candidates as diff vs seed, re-score, one line on numerics each. Which to apply?
+   Results (re-scored in /tmp/canary; t = 2: full run, 10236 steps, 2 ranks; seed full_lowprec):
+   - nano-chihuahua 9.388321 (t = 2: RMS over steps 2.80e-7, final 6.20e-7): only
+     wenoFaceValueLowPrec changes; face value as s3 + (1/6) * weighted neighbour differences.
+   - pink-guppy 9.388321 (= nano at t = 2): nano's face value, rhs update split in two.
+   - humongous-macaw 9.388239 (t = 2: 2.62e-7, final 5.83e-7): same idea, a2 eliminated
+     (a2 = 1 - a1 - a3); x and y fluxes summed before one rhs subtraction.
+   Seed at t = 2: 3.06e-7, final 6.31e-7. The 100-step gain (1.31x) shrinks over a full run to
+   1.10x (nano) and 1.17x (macaw).
+   Outcome (scientist: verify these results; agent default): apply humongous-macaw, best at
+   t = 2, tied at 100 steps. `bmx make check` 17/17.
 
 ## Runner
 

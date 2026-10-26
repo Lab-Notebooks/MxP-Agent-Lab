@@ -157,6 +157,7 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
 
         # Run
         shutil.rmtree(self.appdir / self.outdir, ignore_errors=True)
+        (self.appdir / self.outdir).parent.mkdir(parents=True, exist_ok=True)
         exitcode, self.output = run(self.command, self.timeout, cwd=self.appdir)
         if exitcode:
             label = "RUNTIME_TIMEOUT" if exitcode == 124 else "RUNTIME_CRASH"
@@ -365,7 +366,7 @@ def launch(expdir):
     (results / "experiment.json").write_text(json.dumps(created, indent=2))
 
     nickname = created["nickname"]
-    _json(
+    _call(
         ["ae", "--json", "experiment", "start", nickname]
         + ["--program-dir", str(results / "program"), "--score", str(score)],
         env,

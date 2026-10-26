@@ -7,8 +7,8 @@
 # image only exists for a tree that passes `make check`.  At run time the repo
 # is mounted over /work, so the stages work on (and write into) the live tree.
 #
-# AlphaEvolve jobs need Google Cloud credentials; mount them at run time (HOME is /tmp):
-#   -v "$HOME/.config/gcloud":/tmp/.config/gcloud     (the bmx alias in AGENTS.md does this)
+# Credentials (Google Cloud for AlphaEvolve, API keys) are mounted at run time (HOME is /tmp)
+# from credentials.yaml by the bmx alias in AGENTS.md (make credentials).
 #
 # Stages:
 #   toolchain  Ubuntu 24.04, OpenMPI, LLVM/clang 20 (apt.llvm.org), MPFR, Python

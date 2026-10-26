@@ -23,8 +23,8 @@ the decisions in raptorize's plan.md; the prompt states exactly the rules the ev
 
 - Raptorize is completed, with its decisions in its plan.md.
 - `bmx make check` passes.
-- `bmx gcloud auth application-default print-access-token` succeeds; if not, the scientist runs
-  `gcloud auth application-default login` on the host.
+- `bmx gcloud auth application-default print-access-token` succeeds; if not, the scientist
+  follows the gcloud entry of credentials.example.yaml.
 - The kernel's file has exactly one EVOLVE-BLOCK.
 
 ## Ask: question, then the default to propose

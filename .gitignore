@@ -13,3 +13,4 @@ out_eval/
 __pycache__/
 experiments/**/results/
 out_*/
+credentials.yaml

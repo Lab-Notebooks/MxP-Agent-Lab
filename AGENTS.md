@@ -22,8 +22,10 @@
 - Docker: `make image` builds bubble-mxp; `bmx make check` tests, with (container HOME is /tmp):
 
   ```sh
-  alias bmx='mkdir -p ~/.config/gcloud && docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work -v "$HOME/.config/gcloud":/tmp/.config/gcloud bubble-mxp'
+  alias bmx='c=$(make -s credentials) && docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work $c --env-file <(make -s credentials-env) bubble-mxp'
   ```
+
+  Run from the repo root; credentials come from credentials.yaml (see credentials.example.yaml).
 
 - Keep code and docs succinct: every line is reviewed. Respect the directory layout.
 
