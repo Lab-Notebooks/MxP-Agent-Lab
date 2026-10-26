@@ -28,9 +28,9 @@ struct Params {
     int py = 0;
 
     // initial condition: phi = radius - |x - center|
-    double bubble_x = 0.75;
-    double bubble_y = 0.75;
-    double bubble_r = 0.1;
+    double bubble_x = 0.5;
+    double bubble_y = 0.5;
+    double bubble_r = 0.2;
 
     // time integration
     double tmax = 2.0;

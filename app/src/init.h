@@ -29,16 +29,18 @@ void initLevelSet(const Grid& g, const Params& p, std::vector<double>& dfun);
 // by the reversal-mode error metric).
 double levelSetAnalytic(const Params& p, double x, double y);
 
-// Discrete streamfunction velocity, psi = sin^2(pi x) sin^2(pi y) / pi,
+// Discrete streamfunction velocity, psi = sin(2 pi x) sin(2 pi y) / (2 pi),
 // differenced so that the discrete divergence is zero to machine precision:
 //
-//   u(i,j) = -sin^2(pi x_i) (cos(2 pi (y_j+dy/2)) - cos(2 pi (y_j-dy/2)))/(2 pi dy)
-//   v(i,j) = +sin^2(pi y_j) (cos(2 pi (x_i+dx/2)) - cos(2 pi (x_i-dx/2)))/(2 pi dx)
+//   u(i,j) = -sin(2 pi x_i) (sin(2 pi (y_j+dy/2)) - sin(2 pi (y_j-dy/2)))/(2 pi dy)
+//   v(i,j) = +sin(2 pi y_j) (sin(2 pi (x_i+dx/2)) - sin(2 pi (x_i-dx/2)))/(2 pi dx)
 //
-// Do NOT substitute the analytic curl: the differenced form is what makes
-// invariant 6 hold.  Evaluated analytically everywhere, guard regions
-// included (Spec, "Boundary conditions").  With reverse_time the whole field
-// is scaled by cos(pi t / tmax), which cannot break the divergence property.
+// The 2x2 vortex cell has a saddle at the domain centre, so a bubble placed
+// there is pulled apart into four lobes.  Do NOT substitute the analytic
+// curl: the differenced form is what makes invariant 6 hold.  Evaluated
+// analytically everywhere, guard regions included (Spec, "Boundary
+// conditions").  With reverse_time the whole field is scaled by cos(pi t /
+// tmax), which cannot break the divergence property.
 // `u` and `v` are resized if needed.
 void computeFaceVelocity(const Grid& g, const Params& p, double time, std::vector<double>& u,
                          std::vector<double>& v);

@@ -55,33 +55,29 @@ void computeFaceVelocity(const Grid& g, const Params& p, double time, std::vecto
 
     const double dx = g.dx();
     const double dy = g.dy();
-    // Spec "Optional validation mode": steady field unless reverse_time.
     const double scale = p.reverse_time ? std::cos(kPi * time / p.tmax) : 1.0;
 
     const int ng = g.ng();
 
-    // u: x-face coordinate in x, cell-centre coordinate in y.
+    // Streamfunction psi = sin(2 pi x) sin(2 pi y) / (2 pi): a 2x2 vortex
+    // cell with a saddle at the centre, so a bubble centred there splits.
     for (int j = -ng; j < g.ny() + ng; ++j) {
         const double yc = g.yCenter(j);
-        const double dcos =
-            std::cos(2.0 * kPi * (yc + 0.5 * dy)) - std::cos(2.0 * kPi * (yc - 0.5 * dy));
         for (int i = -ng; i < g.nx() + ng; ++i) {
             const double xf = g.xFace(i);
-            const double s = std::sin(kPi * xf);
-            u[g.index(i, j)] = scale * (-(s * s) * dcos / (2.0 * kPi * dy));
+            const double dpsi = std::sin(2.0 * kPi * (yc + 0.5 * dy)) -
+                                std::sin(2.0 * kPi * (yc - 0.5 * dy));
+            u[g.index(i, j)] = scale * (-std::sin(2.0 * kPi * xf) * dpsi / (2.0 * kPi * dy));
         }
     }
 
-    // v: cell-centre coordinate in x, y-face coordinate in y.
     for (int j = -ng; j < g.ny() + ng; ++j) {
         const double yf = g.yFace(j);
-        const double s = std::sin(kPi * yf);
-        const double s2 = s * s;
         for (int i = -ng; i < g.nx() + ng; ++i) {
             const double xc = g.xCenter(i);
-            const double dcos =
-                std::cos(2.0 * kPi * (xc + 0.5 * dx)) - std::cos(2.0 * kPi * (xc - 0.5 * dx));
-            v[g.index(i, j)] = scale * (s2 * dcos / (2.0 * kPi * dx));
+            const double dpsi = std::sin(2.0 * kPi * (xc + 0.5 * dx)) -
+                                std::sin(2.0 * kPi * (xc - 0.5 * dx));
+            v[g.index(i, j)] = scale * (dpsi * std::sin(2.0 * kPi * yf) / (2.0 * kPi * dx));
         }
     }
 }
