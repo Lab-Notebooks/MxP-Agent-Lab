@@ -1,0 +1,31 @@
+# bmx make evaluate EXP=experiments/2026-10-27/2-optimize
+
+project: "373356333008"
+location: global
+engine: "gemini-enterprise-17652262_1765226257081"
+models: ["gemini-3-flash-preview"]
+
+title: "bf16 WENO5 advection (advectWeno) of a splitting level-set bubble"
+seed: "app/src/advect.cpp"
+language: cpp
+max_programs: 20
+concurrency: 4
+timeout: 600
+
+problem: |
+  The EVOLVE-BLOCK holds advectWeno, the WENO5 advection term of a 2D level set
+  (Flash-X Stencils_advectWeno), in double source that RAPTOR truncates to bf16.
+  Make it closer to the FP64 version under bf16 truncation: lower the final-step
+  spatial error against an FP64 shadow run.
+
+  EVALUATION
+  - Build with `make` (RAPTOR=1); run `mpirun -n 1 ./bubble params/bubble.ini nx=64 ny=64 tmax=1.0
+    plot_interval=0 precision=bf16 outdir=<out>`: the splitting bubble run to tmax,
+    advection in your truncated code, everything else and an FP64 shadow run in double.
+  - Error: column err_rms of history.csv, RMS over cells of |phi - phi_shadow|.
+  - score = accuracy = -log10(err_rms of the final step). Higher is better.
+
+  RULES (violation scores null)
+  1. Code outside the EVOLVE-BLOCK is unchanged.
+  2. advectWeno(const Grid& g, const std::vector<double>& phi, ...) keeps its signature.
+  3. It adds the advection term into rhs (+=) for every owned cell.

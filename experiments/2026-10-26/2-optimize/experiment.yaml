@@ -1,0 +1,35 @@
+# bmx make evaluate EXP=experiments/2026-10-26/2-optimize
+
+project: "<numeric gcp project number>"
+location: global
+engine: "<alphaevolve engine id>"
+models: ["gemini-3-flash-preview"]
+
+title: "Float WENO5 advection (advectWenoLowPrec) of a splitting level-set bubble"
+seed: "app/src/advect.cpp"
+language: cpp
+max_programs: 20
+concurrency: 4
+timeout: 600
+
+problem: |
+  The EVOLVE-BLOCK holds advectWenoLowPrec, the WENO5 advection term of a 2D level set
+  (Flash-X Stencils_advectWeno, flux-difference form, MAC face velocities), in float, with its
+  FP helpers. Make it closer to the FP64 version: lower error against an FP64 shadow run.
+
+  EVALUATION
+  - Build with `make`; run `mpirun -n 1 ./bubble params/bubble.ini nx=128 ny=128 max_steps=100
+    plot_interval=0 precision=lowprec outdir=<out>`: the splitting bubble, 100 steps on 128x128,
+    advection in your float code, everything else and an FP64 shadow run in double.
+  - Error: column err_rms of history.csv, the RMS over cells of |phi - phi_shadow| per step.
+  - score = accuracy = -log10(RMS over steps of err_rms). Higher is better.
+
+  RULES (violation scores null)
+  1. No 64-bit floating point in the EVOLVE-BLOCK; suffix literals with f.
+  2. No preprocessor directive (#include, #define, ...) in the block.
+  3. Every function defined in the block has "LowPrec" in its name.
+  4. Code outside the EVOLVE-BLOCK is unchanged.
+  5. advectWenoLowPrec(const Grid& g, float dxi, float dyi, const float* phi, const float* u,
+     const float* v, float* rhs) keeps this signature. It adds the advection term into rhs (+=)
+     for every owned cell (0 <= i < g.nx(), 0 <= j < g.ny()), reading phi, u, v at g.index(i, j)
+     with at most 3 guard cells.
