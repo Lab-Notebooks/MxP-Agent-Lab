@@ -1,0 +1,527 @@
+diff --git a/app/Makefile b/app/Makefile
+index b03396d..921baf5 100644
+--- a/app/Makefile
++++ b/app/Makefile
+@@ -28,6 +28,16 @@ TESTBINS := $(patsubst $(TESTDIR)/%.cpp,$(OBJDIR)/%,$(TESTSRCS))
+ 
+ DEPS     := $(OBJS:.o=.d) $(TESTBINS:=.d)
+ 
++# RAPTOR-BEGIN: advect.cpp and redistance.cpp through the RAPTOR plugin (RAPTOR* from the root Makefile)
++ifeq ($(RAPTOR),1)
++$(OBJDIR)/advect.o: CXX := $(RAPTOR_CXX)
++$(OBJDIR)/advect.o: CXXFLAGS += $(RAPTOR_CXXFLAGS) $(shell mpicxx --showme:compile)
++$(OBJDIR)/redistance.o: CXX := $(RAPTOR_CXX)
++$(OBJDIR)/redistance.o: CXXFLAGS += $(RAPTOR_CXXFLAGS) $(shell mpicxx --showme:compile)
++LDLIBS += $(RAPTOR_LDLIBS)
++endif
++# RAPTOR-END
++
+ .PHONY: all clean check debug tests
+ 
+ all: $(BIN)
+diff --git a/app/src/advect.cpp b/app/src/advect.cpp
+index 30ab7ec..46e9f2f 100644
+--- a/app/src/advect.cpp
++++ b/app/src/advect.cpp
+@@ -28,7 +28,9 @@
+ 
+ #include "advect.h"
+ 
++#include <algorithm>  // RAPTOR
+ #include <cstddef>
++#include <stdexcept>  // RAPTOR
+ 
+ namespace {
+ 
+@@ -52,9 +54,9 @@ double wenoFaceValue(double s1, double s2, double s3, double s4, double s5, bool
+     const double d2 = 6.0 / 10.0;
+     const double d3 = positive ? (3.0 / 10.0) : (1.0 / 10.0);
+ 
+-    const double aT1 = d1 / sqr(kEps + rIS1);
+-    const double aT2 = d2 / sqr(kEps + rIS2);
+-    const double aT3 = d3 / sqr(kEps + rIS3);
++    const double aT1 = d1 / (((kEps + rIS1) * (kEps + rIS1) == 0.0) ? 1.0e-1 : sqr(kEps + rIS1));  // RAPTOR
++    const double aT2 = d2 / (((kEps + rIS2) * (kEps + rIS2) == 0.0) ? 1.0e-1 : sqr(kEps + rIS2));  // RAPTOR
++    const double aT3 = d3 / (((kEps + rIS3) * (kEps + rIS3) == 0.0) ? 1.0e-1 : sqr(kEps + rIS3));  // RAPTOR
+ 
+     const double aSum = aT1 + aT2 + aT3;
+     const double a1 = aT1 / aSum;
+@@ -143,3 +145,134 @@ void advectWeno(const Grid& g, const std::vector<double>& phi, const std::vector
+         }
+     }
+ }
++
++// RAPTOR-BEGIN: advectWeno at precision m; optimize evolves the lowprec seed.
++// EVOLVE-BLOCK-START
++// The seed: advectWeno and its FP callees, copied in float and renamed *LowPrec.
++namespace {
++
++inline float sqrLowPrec(float x) { return x * x; }
++
++float wenoFaceValueLowPrec(float s1, float s2, float s3, float s4, float s5, bool positive) {
++    const float kEpsLowPrec = 1.0e-15f;
++    const float rIS1 = (13.0f / 12.0f) * sqrLowPrec(s1 - 2.0f * s2 + s3) +
++                       (1.0f / 4.0f) * sqrLowPrec(s1 - 4.0f * s2 + 3.0f * s3);
++    const float rIS2 = (13.0f / 12.0f) * sqrLowPrec(s2 - 2.0f * s3 + s4) +
++                       (1.0f / 4.0f) * sqrLowPrec(s2 - s4);
++    const float rIS3 = (13.0f / 12.0f) * sqrLowPrec(s3 - 2.0f * s4 + s5) +
++                       (1.0f / 4.0f) * sqrLowPrec(3.0f * s3 - 4.0f * s4 + s5);
++
++    const float d1 = positive ? (1.0f / 10.0f) : (3.0f / 10.0f);
++    const float d2 = 6.0f / 10.0f;
++    const float d3 = positive ? (3.0f / 10.0f) : (1.0f / 10.0f);
++
++    const float aT1 = d1 / sqrLowPrec(kEpsLowPrec + rIS1);
++    const float aT2 = d2 / sqrLowPrec(kEpsLowPrec + rIS2);
++    const float aT3 = d3 / sqrLowPrec(kEpsLowPrec + rIS3);
++
++    const float aSum = aT1 + aT2 + aT3;
++    const float a1 = aT1 / aSum;
++    const float a2 = aT2 / aSum;
++    const float a3 = aT3 / aSum;
++
++    float fT1;
++    float fT2;
++    float fT3;
++    if (positive) {
++        fT1 = (2.0f / 6.0f) * s1 - (7.0f / 6.0f) * s2 + (11.0f / 6.0f) * s3;
++        fT2 = -(1.0f / 6.0f) * s2 + (5.0f / 6.0f) * s3 + (2.0f / 6.0f) * s4;
++        fT3 = (2.0f / 6.0f) * s3 + (5.0f / 6.0f) * s4 - (1.0f / 6.0f) * s5;
++    } else {
++        fT1 = -(1.0f / 6.0f) * s1 + (5.0f / 6.0f) * s2 + (2.0f / 6.0f) * s3;
++        fT2 = (2.0f / 6.0f) * s2 + (5.0f / 6.0f) * s3 - (1.0f / 6.0f) * s4;
++        fT3 = (11.0f / 6.0f) * s3 - (7.0f / 6.0f) * s4 + (2.0f / 6.0f) * s5;
++    }
++
++    return a1 * fT1 + a2 * fT2 + a3 * fT3;
++}
++
++}  // namespace
++
++void advectWenoLowPrec(const Grid& g, float dxi, float dyi, const float* phi, const float* u,
++                       const float* v, float* rhs) {
++    const int nx = g.nx();
++    const int ny = g.ny();
++
++    for (int j = 0; j < ny; ++j) {
++        for (int i = 0; i < nx; ++i) {
++            const float ul = u[g.index(i, j)];
++            const float ur = u[g.index(i + 1, j)];
++            const float vl = v[g.index(i, j)];
++            const float vr = v[g.index(i, j + 1)];
++
++            float flx;
++            float frx;
++            if (ur > 0.0f) {
++                frx = wenoFaceValueLowPrec(phi[g.index(i - 2, j)], phi[g.index(i - 1, j)],
++                                           phi[g.index(i, j)], phi[g.index(i + 1, j)],
++                                           phi[g.index(i + 2, j)], true);
++            } else {
++                frx = wenoFaceValueLowPrec(phi[g.index(i - 1, j)], phi[g.index(i, j)],
++                                           phi[g.index(i + 1, j)], phi[g.index(i + 2, j)],
++                                           phi[g.index(i + 3, j)], false);
++            }
++            if (ul > 0.0f) {
++                flx = wenoFaceValueLowPrec(phi[g.index(i - 3, j)], phi[g.index(i - 2, j)],
++                                           phi[g.index(i - 1, j)], phi[g.index(i, j)],
++                                           phi[g.index(i + 1, j)], true);
++            } else {
++                flx = wenoFaceValueLowPrec(phi[g.index(i - 2, j)], phi[g.index(i - 1, j)],
++                                           phi[g.index(i, j)], phi[g.index(i + 1, j)],
++                                           phi[g.index(i + 2, j)], false);
++            }
++
++            float fly;
++            float fry;
++            if (vr > 0.0f) {
++                fry = wenoFaceValueLowPrec(phi[g.index(i, j - 2)], phi[g.index(i, j - 1)],
++                                           phi[g.index(i, j)], phi[g.index(i, j + 1)],
++                                           phi[g.index(i, j + 2)], true);
++            } else {
++                fry = wenoFaceValueLowPrec(phi[g.index(i, j - 1)], phi[g.index(i, j)],
++                                           phi[g.index(i, j + 1)], phi[g.index(i, j + 2)],
++                                           phi[g.index(i, j + 3)], false);
++            }
++            if (vl > 0.0f) {
++                fly = wenoFaceValueLowPrec(phi[g.index(i, j - 3)], phi[g.index(i, j - 2)],
++                                           phi[g.index(i, j - 1)], phi[g.index(i, j)],
++                                           phi[g.index(i, j + 1)], true);
++            } else {
++                fly = wenoFaceValueLowPrec(phi[g.index(i, j - 2)], phi[g.index(i, j - 1)],
++                                           phi[g.index(i, j)], phi[g.index(i, j + 1)],
++                                           phi[g.index(i, j + 2)], false);
++            }
++
++            rhs[g.index(i, j)] += -(frx * ur - flx * ul) * dxi - (fry * vr - fly * vl) * dyi;
++        }
++    }
++}
++// EVOLVE-BLOCK-END
++
++void advectWenoAt(Precision m, const Grid& g, const std::vector<double>& phi,
++                  const std::vector<double>& u, const std::vector<double>& v,
++                  std::vector<double>& rhs) {
++    if (m == Precision::kFp64) {
++        advectWeno(g, phi, u, v, rhs);
++    } else if (m == Precision::kLowPrec) {
++        if (rhs.size() != g.size()) rhs.assign(g.size(), 0.0);
++        std::vector<float> phif(phi.begin(), phi.end()), uf(u.begin(), u.end()),
++            vf(v.begin(), v.end()), rhsf(rhs.begin(), rhs.end());
++        advectWenoLowPrec(g, float(1.0 / g.dx()), float(1.0 / g.dy()), phif.data(), uf.data(),
++                          vf.data(), rhsf.data());
++        std::copy(rhsf.begin(), rhsf.end(), rhs.begin());
++#ifdef BUBBLE_RAPTOR
++    } else if (m == Precision::kFp8E4M3) {
++        __raptor_truncate_op_func(advectWeno, 64, 1, 4, 3)(g, phi, u, v, rhs);
++    } else if (m == Precision::kFp8E5M2) {
++        __raptor_truncate_op_func(advectWeno, 64, 1, 5, 2)(g, phi, u, v, rhs);
++#endif
++    } else {
++        throw std::invalid_argument("this precision needs a RAPTOR=1 build");
++    }
++}
++// RAPTOR-END
+diff --git a/app/src/advect.h b/app/src/advect.h
+index bb77969..7cac05a 100644
+--- a/app/src/advect.h
++++ b/app/src/advect.h
+@@ -40,4 +40,10 @@ double wenoFaceValue(double s1, double s2, double s3, double s4, double s5, bool
+ void advectWeno(const Grid& g, const std::vector<double>& phi, const std::vector<double>& u,
+                 const std::vector<double>& v, std::vector<double>& rhs);
+ 
++// RAPTOR-BEGIN: advectWeno at precision m
++void advectWenoAt(Precision m, const Grid& g, const std::vector<double>& phi,
++                  const std::vector<double>& u, const std::vector<double>& v,
++                  std::vector<double>& rhs);
++// RAPTOR-END
++
+ #endif  // BUBBLE_ADVECT_H
+diff --git a/app/src/driver.cpp b/app/src/driver.cpp
+index dac7446..cff6045 100644
+--- a/app/src/driver.cpp
++++ b/app/src/driver.cpp
+@@ -35,7 +35,7 @@ long advanceOneStep(const Grid& g, const Params& p, std::vector<double>& phi,
+ 
+     // WENO5 accumulates into rhs (the Fortran does), so zero it first.
+     std::fill(rhs.begin(), rhs.end(), 0.0);
+-    advectWeno(g, phi, u, v, rhs);
++    advectWenoAt(p.precision, g, phi, u, v, rhs);  // RAPTOR: was advectWeno(g, phi, u, v, rhs);
+ 
+     // Forward Euler (Stencils_integrateEuler, no source term).
+     for (int j = 0; j < g.ny(); ++j) {
+@@ -47,7 +47,7 @@ long advanceOneStep(const Grid& g, const Params& p, std::vector<double>& phi,
+     g.exchange(phi);
+ 
+     // mph_lsIt redistance iterations; guard cells refreshed between them.
+-    return redistance(g, phi, phiOrig, p.ls_iterations);
++    return redistanceAt(p.precision, g, phi, phiOrig, p.ls_iterations);  // RAPTOR: was redistance(g, phi, phiOrig, p.ls_iterations);
+ }
+ 
+ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, RunSummary& summary,
+@@ -57,6 +57,14 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
+     std::vector<double> rhs = g.allocate();
+     std::vector<double> phiOrig = g.allocate();
+ 
++    // RAPTOR-BEGIN: fp64 shadow, a separate run from the initial state
++    std::vector<double> shadow = dfun;
++    std::vector<double> rhsShadow = g.allocate();
++    std::vector<double> phiOrigShadow = g.allocate();
++    Params fp64 = p;
++    fp64.precision = Precision::kFp64;
++    // RAPTOR-END
++
+     // Unscaled maximum face speeds: the velocity field is steady, and the
+     // optional reverse_time factor cos(pi t / tmax) only shrinks it, so these
+     // give a dt that is stable for the whole run and independent of t.
+@@ -97,6 +105,7 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
+ 
+         const long flips = advanceOneStep(g, p, dfun, u, v, dt, rhs, phiOrig);
+         summary.sign_flips_total += flips;
++        advanceOneStep(g, fp64, shadow, u, v, dt, rhsShadow, phiOrigShadow);  // RAPTOR
+ 
+         time += dt;
+         ++step;
+@@ -109,6 +118,7 @@ bool runSimulation(const Grid& g, const Params& p, std::vector<double>& dfun, Ru
+ 
+         if (wantHist || wantPlot) {
+             diag = computeDiagnostics(g, dfun, u, v, flips);
++            errorsVsShadow(g, dfun, shadow, diag);  // RAPTOR
+             if (diag.max_divergence > summary.max_divergence) {
+                 summary.max_divergence = diag.max_divergence;
+             }
+diff --git a/app/src/io.cpp b/app/src/io.cpp
+index 99c4b5b..e082c57 100644
+--- a/app/src/io.cpp
++++ b/app/src/io.cpp
+@@ -96,6 +96,24 @@ std::string pvtiName(int step) {
+     return std::string(buf);
+ }
+ 
++// RAPTOR-BEGIN: errors vs the fp64 shadow
++void errorsVsShadow(const Grid& g, const std::vector<double>& dfun,
++                    const std::vector<double>& shadow, Diagnostics& d) {
++    double local[2] = {0.0, 0.0};  // sum of squares, max
++    for (int j = 0; j < g.ny(); ++j) {
++        for (int i = 0; i < g.nx(); ++i) {
++            const double e = std::fabs(dfun[g.index(i, j)] - shadow[g.index(i, j)]);
++            local[0] += e * e;
++            if (e > local[1]) local[1] = e;
++        }
++    }
++    double sum = 0.0;
++    MPI_Allreduce(&local[0], &sum, 1, MPI_DOUBLE, MPI_SUM, g.comm());
++    MPI_Allreduce(&local[1], &d.err_max, 1, MPI_DOUBLE, MPI_MAX, g.comm());
++    d.err_rms = std::sqrt(sum / (double(g.nxGlobal()) * g.nyGlobal()));
++}
++// RAPTOR-END
++
+ bool ensureOutputDir(const Grid& g, const Params& p, std::string& err) {
+     int ok = 1;
+     if (g.rank() == 0) {
+@@ -123,7 +141,7 @@ bool writeHistoryHeader(const Grid& g, const Params& p, std::string& err) {
+         if (!f) {
+             ok = 0;
+         } else {
+-            f << "step,time,dt,area,mass,phi_min,phi_max,max_divergence,sign_flips\n";
++            f << "step,time,dt,area,mass,phi_min,phi_max,max_divergence,sign_flips,err_rms,err_max\n";  // RAPTOR: was f << "step,time,dt,area,mass,phi_min,phi_max,max_divergence,sign_flips\n";
+             f.flush();
+             if (!f) ok = 0;
+         }
+@@ -160,7 +178,11 @@ bool appendHistory(const Grid& g, const Params& p, int step, double time, double
+             writeDouble(os, d.phi_max);
+             os << ',';
+             writeDouble(os, d.max_divergence);
+-            os << ',' << d.sign_flips << '\n';
++            os << ',' << d.sign_flips << ',';  // RAPTOR: was os << ',' << d.sign_flips << '\n';
++            writeDouble(os, d.err_rms);  // RAPTOR
++            os << ',';                   // RAPTOR
++            writeDouble(os, d.err_max);  // RAPTOR
++            os << '\n';                  // RAPTOR
+             f << os.str();
+             f.flush();
+             if (!f) ok = 0;
+diff --git a/app/src/io.h b/app/src/io.h
+index fd86add..eb82d7f 100644
+--- a/app/src/io.h
++++ b/app/src/io.h
+@@ -32,6 +32,8 @@ struct Diagnostics {
+     double phi_max = 0.0;
+     double max_divergence = 0.0;   // invariant 6
+     long sign_flips = 0;           // redistance warning counter of the last step
++    double err_rms = 0.0;          // RAPTOR: rms |dfun - shadow| over owned cells
++    double err_max = 0.0;          // RAPTOR: max |dfun - shadow|
+ };
+ 
+ // Smoothed Heaviside with half-width `eps` (Spec: 1.5 cells):
+@@ -48,6 +50,11 @@ Diagnostics computeDiagnostics(const Grid& g, const std::vector<double>& dfun,
+                                const std::vector<double>& u, const std::vector<double>& v,
+                                long signFlips);
+ 
++// RAPTOR-BEGIN: errors of `dfun` vs the fp64 shadow, reduced over ranks, into d
++void errorsVsShadow(const Grid& g, const std::vector<double>& dfun,
++                    const std::vector<double>& shadow, Diagnostics& d);
++// RAPTOR-END
++
+ // Create `p.outdir` if it does not exist (rank 0 creates, all ranks wait).
+ // Returns false with `err` filled if it cannot be created.
+ bool ensureOutputDir(const Grid& g, const Params& p, std::string& err);
+diff --git a/app/src/params.h b/app/src/params.h
+index 2865465..1f66429 100644
+--- a/app/src/params.h
++++ b/app/src/params.h
+@@ -14,6 +14,10 @@
+ // WENO5 reaches i-3 .. i+3.  Fewer guard cells is a silent correctness bug.
+ constexpr int NGUARD = 3;
+ 
++// RAPTOR-BEGIN: precision modes of advectWeno and redistance
++enum class Precision { kFp64, kFp8E4M3, kFp8E5M2, kLowPrec };
++// RAPTOR-END
++
+ struct Params {
+     // mesh
+     int nx = 128;             // interior cells in x (global)
+@@ -47,6 +51,7 @@ struct Params {
+     int plot_interval = 20;   // steps between .vti/.pvti dumps (<=0 disables)
+     int hist_interval = 1;    // steps between history.csv rows
+     int verbosity = 1;
++    Precision precision = Precision::kFp64;  // RAPTOR
+ };
+ 
+ namespace paramsdetail {
+@@ -113,6 +118,15 @@ inline bool setParam(const std::string& key, const std::string& val, Params& p,
+     else if (key == "plot_interval") ok = paramsdetail::toInt(val, p.plot_interval);
+     else if (key == "hist_interval") ok = paramsdetail::toInt(val, p.hist_interval);
+     else if (key == "verbosity") ok = paramsdetail::toInt(val, p.verbosity);
++    // RAPTOR-BEGIN: precision = fp64 | fp8e4m3 | fp8e5m2 | lowprec
++    else if (key == "precision") {
++        if (val == "fp64") p.precision = Precision::kFp64;
++        else if (val == "fp8e4m3") p.precision = Precision::kFp8E4M3;
++        else if (val == "fp8e5m2") p.precision = Precision::kFp8E5M2;
++        else if (val == "lowprec") p.precision = Precision::kLowPrec;
++        else ok = false;
++    }
++    // RAPTOR-END
+     else { known = false; return false; }
+     return ok;
+ }
+diff --git a/app/src/redistance.cpp b/app/src/redistance.cpp
+index 26c4e58..d8d22c1 100644
+--- a/app/src/redistance.cpp
++++ b/app/src/redistance.cpp
+@@ -4,6 +4,7 @@
+ #include "redistance.h"
+ 
+ #include <cmath>
++#include <stdexcept>  // RAPTOR
+ 
+ namespace {
+ 
+@@ -64,7 +65,7 @@ long redistanceIteration(const Grid& g, std::vector<double>& phi,
+             const double syr = phio[g.index(i, j + 1)];
+ 
+             const double orig = phiOrig[c];
+-            const double sgn = orig / (std::fabs(orig) + kEps);
++            const double sgn = orig / (((std::fabs(orig) + kEps) == 0.0) ? 1.0e-1 : (std::fabs(orig) + kEps));  // RAPTOR
+ 
+             double value;
+             if (sm * sxl < 0.0 || sm * sxr < 0.0 || sm * syl < 0.0 || sm * syr < 0.0) {
+@@ -118,3 +119,125 @@ long redistance(const Grid& g, std::vector<double>& phi, std::vector<double>& ph
+     MPI_Allreduce(&flips, &global, 1, MPI_LONG, MPI_SUM, g.comm());
+     return global;
+ }
++
++// RAPTOR-BEGIN: redistance at precision m; optimize evolves the lowprec seed.
++// EVOLVE-BLOCK-START
++// The seed: redistance and its FP callees, copied in float and renamed *LowPrec.
++namespace {
++
++constexpr float kEpsLowPrec = 1.0e-15f;  // Fortran: eps = 1E-15
++
++inline float signOfLowPrec(float x) { return (x < 0.0f) ? -1.0f : 1.0f; }
++
++inline float maxdLowPrec(float a, float b) { return (a > b) ? a : b; }
++inline float mindLowPrec(float a, float b) { return (a < b) ? a : b; }
++
++}  // namespace
++
++float lsPseudoTimestepLowPrec(const Grid& g) {
++    const float minCellDiag = std::sqrt(static_cast<float>(g.dx()) * static_cast<float>(g.dx()) +
++                                        static_cast<float>(g.dy()) * static_cast<float>(g.dy()));
++    return minCellDiag / 5.0f;
++}
++
++long redistanceIterationLowPrec(const Grid& g, std::vector<float>& phi,
++                                const std::vector<float>& phiOrig, float lsDT) {
++    const std::vector<float> phio = phi;
++
++    long flips = 0;
++    for (int j = 0; j < g.ny(); ++j) {
++        for (int i = 0; i < g.nx(); ++i) {
++            const int c = g.index(i, j);
++            const float sm = phio[c];
++            const float sxl = phio[g.index(i - 1, j)];
++            const float sxr = phio[g.index(i + 1, j)];
++            const float syl = phio[g.index(i, j - 1)];
++            const float syr = phio[g.index(i, j + 1)];
++
++            const float orig = phiOrig[c];
++            const float sgn = orig / (std::fabs(orig) + kEpsLowPrec);
++
++            float value;
++            if (sm * sxl < 0.0f || sm * sxr < 0.0f || sm * syl < 0.0f || sm * syr < 0.0f) {
++                value = orig;
++            } else {
++                const float ap = maxdLowPrec(sm - sxl, 0.0f) / static_cast<float>(g.dx());
++                const float an = mindLowPrec(sm - sxl, 0.0f) / static_cast<float>(g.dx());
++                const float bp = maxdLowPrec(sxr - sm, 0.0f) / static_cast<float>(g.dx());
++                const float bn = mindLowPrec(sxr - sm, 0.0f) / static_cast<float>(g.dx());
++                const float cp = maxdLowPrec(sm - syl, 0.0f) / static_cast<float>(g.dy());
++                const float cn = mindLowPrec(sm - syl, 0.0f) / static_cast<float>(g.dy());
++                const float dp = maxdLowPrec(syr - sm, 0.0f) / static_cast<float>(g.dy());
++                const float dn = mindLowPrec(syr - sm, 0.0f) / static_cast<float>(g.dy());
++
++                float agf;
++                if (sm > 0.0f) {
++                    agf = std::sqrt(maxdLowPrec(ap * ap, bn * bn) + maxdLowPrec(cp * cp, dn * dn)) - 1.0f;
++                } else if (sm < 0.0f) {
++                    agf = std::sqrt(maxdLowPrec(an * an, bp * bp) + maxdLowPrec(cn * cn, dp * dp)) - 1.0f;
++                } else {
++                    agf = 0.0f;
++                }
++                value = sm - lsDT * (sgn * agf);
++            }
++
++            phi[c] = value;
++            if (signOfLowPrec(value) != signOfLowPrec(orig)) ++flips;
++        }
++    }
++    return flips;
++}
++
++long redistanceLowPrec(const Grid& g, std::vector<float>& phi, std::vector<float>& phiOrig,
++                       int iterations) {
++    if (phi.size() != g.size()) phi.assign(g.size(), 0.0f);
++    if (phiOrig.size() != g.size()) phiOrig.assign(g.size(), 0.0f);
++    const float lsDT = lsPseudoTimestepLowPrec(g);
++
++    long flips = 0;
++    for (int it = 1; it <= iterations; ++it) {
++        if (it == 1) phiOrig = phi;
++        {
++            std::vector<double> dphi(phi.begin(), phi.end());
++            g.exchange(dphi);
++            for (std::size_t k = 0; k < phi.size(); ++k) phi[k] = static_cast<float>(dphi[k]);
++        }
++        flips = redistanceIterationLowPrec(g, phi, phiOrig, lsDT);
++    }
++    if (iterations > 0) {
++        std::vector<double> dphi(phi.begin(), phi.end());
++        g.exchange(dphi);
++        for (std::size_t k = 0; k < phi.size(); ++k) phi[k] = static_cast<float>(dphi[k]);
++    }
++
++    long global = 0;
++    MPI_Allreduce(&flips, &global, 1, MPI_LONG, MPI_SUM, g.comm());
++    return global;
++}
++// EVOLVE-BLOCK-END
++
++long redistanceAt(Precision m, const Grid& g, std::vector<double>& phi,
++                  std::vector<double>& phiOrig, int iterations) {
++    if (m == Precision::kFp64) {
++        return redistance(g, phi, phiOrig, iterations);
++    } else if (m == Precision::kLowPrec) {
++        if (phi.size() != g.size()) phi.assign(g.size(), 0.0);
++        if (phiOrig.size() != g.size()) phiOrig.assign(g.size(), 0.0);
++        std::vector<float> phif(phi.begin(), phi.end()), phiOrigf(phiOrig.begin(), phiOrig.end());
++        long r = redistanceLowPrec(g, phif, phiOrigf, iterations);
++        std::copy(phif.begin(), phif.end(), phi.begin());
++        std::copy(phiOrigf.begin(), phiOrigf.end(), phiOrig.begin());
++        return r;
++    }
++#ifdef BUBBLE_RAPTOR
++    else if (m == Precision::kFp8E4M3) {
++        return __raptor_truncate_op_func(redistance, 64, 1, 4, 3)(g, phi, phiOrig, iterations);
++    } else if (m == Precision::kFp8E5M2) {
++        return __raptor_truncate_op_func(redistance, 64, 1, 5, 2)(g, phi, phiOrig, iterations);
++    }
++#endif
++    else {
++        throw std::invalid_argument("this precision needs a RAPTOR=1 build");
++    }
++}
++// RAPTOR-END
+diff --git a/app/src/redistance.h b/app/src/redistance.h
+index 640f7f5..852910e 100644
+--- a/app/src/redistance.h
++++ b/app/src/redistance.h
+@@ -58,4 +58,9 @@ long redistanceIteration(const Grid& g, std::vector<double>& phi,
+ long redistance(const Grid& g, std::vector<double>& phi, std::vector<double>& phiOrig,
+                 int iterations);
+ 
++// RAPTOR-BEGIN: redistance at precision m
++long redistanceAt(Precision m, const Grid& g, std::vector<double>& phi,
++                  std::vector<double>& phiOrig, int iterations);
++// RAPTOR-END
++
+ #endif  // BUBBLE_REDISTANCE_H

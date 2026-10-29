@@ -1,0 +1,97 @@
+\documentclass[11pt]{article}
+\usepackage[paperwidth=8.5in,paperheight=11in,textwidth=5.6in,top=0.9in,bottom=0.9in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,graphicx,booktabs,xcolor,enumitem,tcolorbox,float}
+\definecolor{accent}{HTML}{2A78D6}
+\definecolor{ink}{HTML}{0B0B0B}
+\definecolor{muted}{HTML}{52514E}
+\definecolor{wash}{HTML}{F3F2EE}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\newcommand{\f}[1]{\texttt{#1}}
+\newtcolorbox{panel}[1][]{enhanced,colback=wash,colframe=wash,arc=4pt,left=10pt,right=10pt,#1}
+\begin{document}
+
+{\small\color{muted}LAB NOTEBOOK \textbullet{} 2026-10-28 \textbullet{} 8-bit emulation of advect}\
+
+{\fontsize{22}{26}\selectfont\bfseries\color{ink} AlphaEvolve on an 8-bit level-set advection kernel}\\[6pt]
+{\large\color{muted} Deforming bubble, WENO5 advection, RAPTOR fp8 truncation, and an interface-weighted score.}
+
+\section{Question}
+Can the WENO5 advection kernel run in 8-bit (RAPTOR-emulated) while the level set stays within a
+tolerable error of an FP64 shadow run, and can AlphaEvolve improve the low-precision seed?
+
+\section{Setup}
+App: Deforming Bubble mini-app (Flash-X level set), 64x64, tmax=2, 1 rank. Kernel: \f{advectWeno}
+in \f{app/src/advect.cpp}. Raptorize added modes fp64, fp8e4m3, fp8e5m2, lowprec (native float seed),
+plus an FP64 shadow run and error columns in \f{history.csv}.
+
+\section{AlphaEvolve experiment}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Parameter & Value \\
+\midrule
+Experiment & exp-invaluable-boar \\
+Model & gemini-3-flash-preview \\
+Max programs & 20 \\
+Concurrency & 4 \\
+Timeout per eval & 600 s \\
+Eval run & nx=64 ny=64 tmax=2 plot\_interval=0 precision=lowprec \\
+Score & -log10(RMS over rows of err\_band) \\
+Seed score & 8.318818 (5113 rows, rms err\_band 4.799e-9) \\
+Best score & 8.576261 (rms err\_band 2.653e-9) \\
+Programs evaluated & 19 (18 succeeded, 1 failed) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Evaluation: build with \f{make -j4}, audit the EVOLVE-BLOCK (no double, no \f{\#include}, \f{*LowPrec}
+names, no fp64 asm), run the lowprec case, read \f{err\_band} from \f{history.csv}, score
+\f{-log10(rms)}. Rules violations score null.
+
+\section{Timing}
+\begin{center}
+\begin{tabular}{@{}lrr@{}}
+\toprule
+Run & Steps & Wall time (s) \\
+\midrule
+fp64 animation & 5112 & 341.5 \\
+fp8e4m3 original animation & 5112 & 341.5 \\
+fp8e4m3 optimized animation & 5112 & 337.7 \\
+AlphaEvolve job & 19 programs & \textasciitilde 20 min \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Results at t=2}
+\begin{center}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Mode & area & err\_rms & err\_band \\
+\midrule
+fp64 & 0.1772 & 0 & 0 \\
+fp8e4m3 (original) & 0.2229 & 3.216e-2 & 1.972e-2 \\
+fp8e4m3 (optimized seed) & 0.2229 & 3.216e-2 & 1.972e-2 \\
+lowprec seed (before) & -- & -- & 4.799e-9 (eval) \\
+lowprec seed (after) & -- & -- & 2.653e-9 (eval) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Level-set behavior}
+The fp64 run deforms and splits the bubble by t=2. The fp8e4m3 run follows the same topology but
+develops ragged contours and spurious phi=0 islands along the thin filament; err\_band rises from
+\textasciitilde 1.3e-2 at t=0.5 to \textasciitilde 2.0e-2 at t=2, and wrong-sign cells reach \textasciitilde 16\%.
+
+The optimized seed improves the native float path (err\_band 1.8x lower in the eval run) but does
+not change the fp8 path, because RAPTOR truncates the FP64 \f{advectWeno}, not the evolved float
+seed. The fp8 animation is bit-identical before and after optimization.
+
+\section{Conclusion}
+AlphaEvolve improved the float seed's interface error, but the 8-bit (RAPTOR) path is unchanged.
+To affect fp8 output, the optimization target must be the RAPTOR-truncated FP64 function itself.
+
+\end{document}
+EOF
+echo done
