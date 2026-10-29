@@ -88,6 +88,17 @@ The optimized seed improves the native float path (err\_band 1.8x lower in the e
 not change the fp8 path, because RAPTOR truncates the FP64 \f{advectWeno}, not the evolved float
 seed. The fp8 animation is bit-identical before and after optimization.
 
+\section{Qualitative and quantitative}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.32\textwidth]{4-raptorize/results/overlay/overlay_000000.png}%
+\includegraphics[width=0.32\textwidth]{4-raptorize/results/overlay/overlay_002560.png}%
+\includegraphics[width=0.32\textwidth]{4-raptorize/results/overlay/overlay_005112.png}
+\caption{fp64 (solid black) vs.\ fp8e4m3 (dashed red) $\phi=0$ contours, with err\_band and
+wrong-sign cells vs.\ time beside them. Frames at $t\approx 0,1,2$.}
+\label{fig:overlay}
+\end{figure}
+
 \section{Conclusion}
 AlphaEvolve improved the float seed's interface error, but the 8-bit (RAPTOR) path is unchanged.
 To affect fp8 output, the optimization target must be the RAPTOR-truncated FP64 function itself.
