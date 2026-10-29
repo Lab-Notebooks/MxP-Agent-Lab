@@ -23,14 +23,17 @@ the decisions in raptorize's plan.md; the prompt states exactly the rules the ev
 
 - Raptorize is completed, with its decisions in its plan.md.
 - `bmx make check` passes.
-- `bmx gcloud auth application-default print-access-token` succeeds; if not, the scientist
-  follows the gcloud entry of credentials.example.yaml.
 - The kernel's file has exactly one EVOLVE-BLOCK.
 
 ## Ask: question, then the default to propose
 
-- Score: which error column, how reduced?
-  -log10 of the RMS over rows of the first error column.
+- Score: which precision mode, which error column, how reduced?
+  The evaluator can score any raptorize mode: fp64 (baseline, all errors 0),
+  lowprec (the native float seed, the usual optimize target), or fp8e4m3 /
+  fp8e5m2 (the RAPTOR-truncated FP64 path). Pick the mode with PRECISION=...
+  and the column with ERROR_COLUMN=...; default -log10 of the RMS over rows of
+  err_rms in lowprec mode (use err_band to weight the phi=0 interface). Note: fp8 modes truncate the FP64 function, not the
+  evolved float seed, so they are verification metrics rather than optimize targets.
 - Speed: counted, and under which gate?
   Not counted.
 - Extra hard rules beyond the template?

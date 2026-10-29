@@ -31,7 +31,7 @@ Ask the agent, e.g. "plan raptorize". Commands:
 
     make check                      # build and test app/
     make image                      # docker image; then bmx (see AGENTS.md)
-    cp credentials.example.yaml credentials.yaml   # once; fill in, chmod 600
+    cp dev/workflows/optimize/credentials.yaml credentials.yaml   # once; fill in, chmod 600
     bmx make evaluate EXP=$R        # score the seed once (R = E/<n>-optimize)
     bmx make evolve EXP=$R          # run AlphaEvolve
     bmx make verify EXP=$R          # R = E/<n>-verify

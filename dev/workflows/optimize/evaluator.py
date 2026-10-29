@@ -36,16 +36,20 @@ sys.path.insert(0, str(ROOT / "dev/workflows/optimize"))
 
 import evolve  # pylint: disable=wrong-import-position,import-error
 
-# TODO: source, run and errors from raptorize's plan.md, metrics from the scientist,
-# primary first (ae optimizes the first). Source paths and the command are relative to app/.
+# Scored precision mode and error column; override with PRECISION=... / ERROR_COLUMN=...
+MODE = os.environ.get("PRECISION", "lowprec")
+COLUMN = os.environ.get("ERROR_COLUMN", "err_rms")
+
+# TODO: fill source, objfile, command, metrics from raptorize's plan.md.
 OUTDIR = Path(__file__).resolve().parent / "results/eval"
 EVALUATOR = evolve.Evaluator(
     root=ROOT,
     source="<kernel file>",
     objfile="<its object file>",
-    command="<run>".format(mode="lowprec", out=OUTDIR),
+    command="<run>".format(mode=MODE, out=OUTDIR),
     outdir=OUTDIR,
     metrics=["score", "accuracy"],
+    tag=os.environ.get("TAG", "LowPrec"),
 )
 ERRORS = OUTDIR / "<errors csv>"
 
@@ -58,12 +62,11 @@ def evaluate():
     if failed:
         return failed
 
-    # TODO: the error column against the FP64 shadow
-    errors = evolve.read_csv(ERRORS).get("<column>", []) if ERRORS.is_file() else []
+    errors = evolve.read_csv(ERRORS).get(COLUMN, []) if ERRORS.is_file() else []
     if not errors or not all(math.isfinite(error) for error in errors):
         return EVALUATOR.fail("NAN_OR_INF", f"{ERRORS}: error missing or non-finite.")
 
-    # TODO: the scientist's formula and gates, e.g. + w * log2(speedup) while rms <= tol
+    # TODO: scientist's score formula and gates.
     rms = math.sqrt(sum(error * error for error in errors) / len(errors))
     accuracy = -math.log10(rms + 1e-30)
 

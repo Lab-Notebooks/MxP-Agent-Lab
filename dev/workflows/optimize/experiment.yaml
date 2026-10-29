@@ -1,19 +1,18 @@
 # Copy to E/<n>-optimize/experiment.yaml; fill every <...>. Rules here == rules in evaluator.py.
 # bmx make evolve EXP=E/<n>-optimize
+# Override at run time: PRECISION=fp8e4m3 ERROR_COLUMN=err_band bmx make evaluate EXP=$R
 
-# ae / Google Cloud
 project: "<numeric gcp project number>"   # gcloud projects describe <id> --format="value(projectNumber)"
 location: global
 engine: "<alphaevolve engine id>"
 models: ["<model>"]
 
-# job
 title: "<what is evolved>"
-seed: "app/<kernel file>"         # from raptorize's plan.md; uploaded as initial_program.py
+seed: "app/<kernel file>"         # from raptorize's plan.md
 language: cpp
 max_programs: <n>
-concurrency: 4                    # parallel generations; evaluations run one at a time
-timeout: 600                      # seconds per evaluation
+concurrency: 4
+timeout: 600
 
 problem: |
   <The functions in the EVOLVE-BLOCK, and what "better" means.>

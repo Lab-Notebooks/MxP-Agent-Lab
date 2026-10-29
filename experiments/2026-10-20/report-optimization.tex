@@ -1,23 +1,12 @@
-\documentclass[11pt]{article}
-\usepackage[paperwidth=8.5in,paperheight=11in,textwidth=5.6in,top=0.9in,bottom=0.9in]{geometry}
-\usepackage[T1]{fontenc}
-\usepackage{lmodern,microtype,graphicx,booktabs,xcolor,enumitem,titlesec,float,amsmath}
-\usepackage[most]{tcolorbox}
+\documentclass{../style}
+\usepackage{titlesec,amsmath}
 \usepackage[colorlinks,urlcolor=accent,linkcolor=accent]{hyperref}
 \renewcommand{\familydefault}{\sfdefault}
-\definecolor{accent}{HTML}{2A78D6}
-\definecolor{ink}{HTML}{0B0B0B}
-\definecolor{muted}{HTML}{52514E}
-\definecolor{wash}{HTML}{F3F2EE}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0.6em}
 \setlist{nosep,leftmargin=1.2em}
 \titleformat{\section}{\Large\bfseries\color{ink}}{}{0pt}{}
 \titlespacing*{\section}{0pt}{1.4em}{0.3em}
-\newcommand{\f}[1]{\texttt{#1}}
 \newtcolorbox{quoteit}{enhanced,breakable,colback=white,colframe=white,borderline west={3pt}{0pt}{accent},
   left=10pt,right=4pt,top=2pt,bottom=2pt,fontupper=\itshape\color{muted}}
-\newtcolorbox{panel}[1][]{enhanced,colback=wash,colframe=wash,arc=4pt,left=10pt,right=10pt,#1}
 \newcommand{\stat}[2]{\begin{tabular}[t]{@{}c@{}}{\huge\bfseries\color{accent}#1}\\[2pt]{\small\color{muted}#2}\end{tabular}}
 \newcommand{\who}[1]{\textbf{\color{accent}#1}}
 

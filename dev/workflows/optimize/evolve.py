@@ -146,7 +146,8 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
         None on success (run output in self.output), else the failed result
         """
         # Build
-        exitcode, output = run(["make", "-j4"], 900, cwd=self.root)
+        run(["make", "clean"], 120, cwd=self.root)
+        exitcode, output = run(["make", "RAPTOR=1", "-j4"], 900, cwd=self.root)
         if exitcode:
             return self.fail("COMPILATION_ERROR", output[-4000:])
 
@@ -188,11 +189,13 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
         for index, block in enumerate(blocks, start=1):
             code = COMMENTS.sub("", block)
             for token in FORBIDDEN_TOKENS:
+                if token == r"\bdouble\b" and os.environ.get("ALLOW_DOUBLE") == "1":
+                    continue
                 if re.search(token, code):
                     text = f"'{token}' inside EVOLVE-BLOCK #{index} of {self.source}."
                     return [("FORBIDDEN_TOKEN", text)]
             for name in DEFINITION.findall(code):
-                if name not in KEYWORDS and self.tag not in name:
+                if self.tag and name not in KEYWORDS and self.tag not in name:
                     text = f"function '{name}' in EVOLVE-BLOCK #{index}: name it *{self.tag}*."
                     return [("UNTAGGED_FUNCTION", text)]
 
@@ -211,7 +214,11 @@ class Evaluator:  # pylint: disable=too-many-instance-attributes
                 function = header.group(1)
                 continue
 
-            if self.tag in function:
+            if (
+                self.tag
+                and self.tag in function
+                and os.environ.get("ALLOW_DOUBLE") != "1"
+            ):
                 match = FORBIDDEN_ASM.search(line)
                 if match:
                     text = (

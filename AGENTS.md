@@ -25,7 +25,7 @@
   alias bmx='c=$(make -s credentials) && docker run --rm --user "$(id -u):$(id -g)" -v "$PWD":/work $c --env-file <(make -s credentials-env) bubble-mxp'
   ```
 
-  Run from the repo root; credentials come from credentials.yaml (see credentials.example.yaml).
+  Run from the repo root; credentials come from credentials.yaml (see dev/workflows/optimize/credentials.yaml).
 
 - Keep code and docs succinct: every line is reviewed. Respect the directory layout.
 

@@ -43,8 +43,10 @@ keys under Ask.
   The hottest FP loop in app/'s sources; its object from app/Makefile.
 - formats: RAPTOR formats, as (exponent, mantissa)?
   fp32 (8, 23), bf16 (8, 7).
-- lowprec: type of the seed?
-  float.
+- seed: native low-precision seed, or none?
+  If a seed is wanted, its type (float, ...). If none, the EVOLVE-BLOCK is the FP64
+  kernel itself and RAPTOR truncates it to the target format; the optimize stage then
+  scores that target mode instead of lowprec.
 - errors: measures vs the FP64 shadow, as CSV file and columns?
   RMS and max of the main state field.
 - run: eval command, with {mode} and {out}; input, size, ranks, steps?
